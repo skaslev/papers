@@ -1,0 +1,145 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\title{Playing with function iteration}
+\author{Slavomir Kaslev}
+
+\begin{document}
+\maketitle
+
+\section{General problem}
+
+The equations $f(x) = x + f(x^2 + x^3)$ and $f(x) = x + f(\frac{1}{1-x})$ are instances of the more general equation
+\begin{equation}
+f(x) = x + f(g(x))\label{eq:eq1}
+\end{equation}
+We want to find a function $f(x)$ such that \eqref{eq:eq1} holds for all $x$, where the function $g(x)$ is known. Telescoping the equation gives
+$$f(x) = x + g(x) + g(g(x)) + g(g(g(x))) + \dots$$
+Let's use the following notation for iterating a function
+\begin{align*}
+g^{[0]}(x) &= x\\
+g^{[1]}(x) &= g(x)\\
+g^{[n]}(x) &= g(g^{[n-1]}(x))
+\end{align*}
+to rewrite equation \eqref{eq:eq1} as
+\begin{equation}
+f(x) = \sum_{n=0}^{\infty}{g^{[n]}(x)}\label{eq:eq2}
+\end{equation}
+We've reduced the problem from solving equation \eqref{eq:eq1} to calculating the infinite sum \eqref{eq:eq2}.
+
+\section{Power series sleight of hand}
+
+The next step is instead of solving equation \eqref{eq:eq1} we'll change the problem by inserting a small parameter $\epsilon$
+\begin{equation}
+f(x) = x + \epsilon f(g(x))\label{eq:eq3}
+\end{equation}
+Repeating the steps above, we telescope \eqref{eq:eq3}
+$$f(x) = x + \epsilon g(x) + \epsilon^2 g(g(x)) + \epsilon^3 g(g(g(x))) + \dots$$
+and finally we get $f(x)$ as power series of $\epsilon$
+\begin{equation}\label{eq4}
+f(x) = \sum_{n=0}^{\infty}{g^{[n]}(x)} \epsilon^n
+\end{equation}
+
+Now we have two procedures for computing $f(x)$ defined by equations \eqref{eq:eq2} and \eqref{eq4}. Of course, the two procedures will agree only if we finally set $\epsilon$ to $1$.
+
+\section{Special case $g(x) = \frac{1}{1-x}$}
+
+Equation \eqref{eq:eq3} takes the form
+\begin{equation}\label{eq5}
+f(x) = x + \epsilon f(\frac{1}{1-x})
+\end{equation}
+Note that the function $g^{[n]}(x)$ is periodic in $n$ with period 3. That is
+\begin{align*}
+g^{[0]}(x) &= x\\
+g^{[1]}(x) &= \frac{1}{1-x}\\
+g^{[2]}(x) &= 1 - \frac{1}{x}\\
+g^{[3]}(x) &= x
+\end{align*}
+So the series in \eqref{eq4} have the form
+\begin{equation}\label{eq6}
+f(x) = x + \epsilon \frac{1}{1-x} + \epsilon^2 (1 - \frac{1}{x}) + \epsilon^3 x + \epsilon^4 \frac{1}{1-x} + \dots
+\end{equation}
+We'll sum this series using a generic summation procedure $S$ with the properties
+\begin{subequations}
+\begin{align}
+  S(a_0 + a_1 + a_2 + \dots) &= a_0 + S(a_1 + a_2 + a_3 + \dots)\label{eq:sum1}\\
+  S(\sum{\alpha a_n} + \sum{\beta b_n}) &= \alpha S(\sum{a_n}) + \beta S(\sum{b_n})\label{eq:sum2}
+\end{align}
+\end{subequations}
+To simplify the calculation we'll substitute
+\begin{equation*}
+s = f(x)
+\qquad
+a = x
+\qquad
+b = \frac{1}{1-x}
+\qquad
+c = 1 - \frac{1}{x}
+\end{equation*}
+in \eqref{eq6} to obtain
+$$s = S(a + b \epsilon + c \epsilon^2 + a \epsilon^3 + b \epsilon^4 + c \epsilon^5 + \dots)$$
+Next we'll pull the first term out of the sum two times by \eqref{eq:sum1} and bring $\epsilon$ outside the sum by \eqref{eq:sum2}
+\begin{align*}
+s = S&(a + b \epsilon + c \epsilon^2 + a \epsilon^3 + b \epsilon^4 + c \epsilon^5 + \dots)\\
+s = a + \epsilon S&(b + c \epsilon + a \epsilon^2 + b\epsilon^3 + c\epsilon^4 + a \epsilon^5 + \dots)\\
+s = a + b \epsilon + \epsilon^2 S&(c + a \epsilon + b\epsilon^2 + c\epsilon^3 + a \epsilon^4 + b \epsilon^5+ \dots)\\
+\end{align*}
+If we multiply the first equation by $\epsilon^2$, the second by $\epsilon$ then add them all up, the result is
+$$(1 + \epsilon + \epsilon^2)s = (1+\epsilon)a + \epsilon b + \epsilon^2 (a+b+c) S(1 + \epsilon + \epsilon^2 + \epsilon^3 + \dots)$$
+Notice that $S(1 + \epsilon + \epsilon^2 + \epsilon^3 + \dots) = \frac{1}{1-\epsilon}$ and now we have an explicit formula for $s$
+$$s=\frac{(1+\epsilon) a + \epsilon b}{1+\epsilon+\epsilon^2} + \frac{\epsilon^2}{1-\epsilon^3}(a+b+c)$$
+Therefore the solution of \eqref{eq5} is
+\begin{equation}
+f(x) = \frac{(1+\epsilon)x + \epsilon\frac{1}{1-x}}{1+\epsilon+\epsilon^2} + \frac{\epsilon^2}{1-\epsilon^3}\frac{x^3-3x+1}{x(x-1)}\label{eq:soleps}
+\end{equation}
+We're interested in the solution of this equation
+\begin{equation}
+f(x) = x + f(\frac{1}{1-x})\label{eq9}
+\end{equation}
+which can be derived from \eqref{eq:soleps} by seting $\epsilon$ to $1$.
+Notice that when $\epsilon=1$, the second term in the equation becomes infinite unless $x^3-3x+1=0$.
+
+We conclude that the solution $f(x)$ of equation \eqref{eq9} is infinite everywhere except for a finite set of points given by the roots of the equation
+$$x^3-3x+1=0$$
+namely
+\begin{equation*}
+x_1 \approx -1.87938524
+\qquad
+x_2 \approx 0.34729636
+\qquad
+x_3 \approx 1.53208889
+\end{equation*}
+where $f(x)$ has an explicit formula
+$$f(x)=\frac{1}{3}\;\frac{1 + 2x - 2x^2}{1-x}$$
+and can be evalutated directly
+\begin{equation*}
+f(x_1) \approx -1.13715804
+\qquad
+f(x_2) \approx 0.7422272
+\qquad
+f(x_3) \approx 0.39493084
+\end{equation*}
+Notice that iterating $g(x)$ over the numbers $x_1,x_2,x_3$ forms a cycle
+\begin{equation*}
+g(x_1) = x_2
+\qquad
+g(x_2) = x_3
+\qquad
+g(x_3) = x_1
+\end{equation*}
+and
+\begin{equation*}
+\sum_{k=1}^{3}{x_k} = 0
+\qquad
+\sum_{k=1}^{3}{f(x_k)} = 0
+\qquad
+\sum_{k=1}^{3}{g(x_k)} = 0
+\end{equation*}
+
+\end{document}
