@@ -1,0 +1,79 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small}
+\DefineVerbatimEnvironment{example}{Verbatim}{fontsize=\small}
+\newcommand{\ignore}[1]{}
+
+\title{On general balanced trees}
+\author{Slavomir Kaslev}
+
+\begin{document}
+\maketitle
+
+\section{Definition}
+
+General balanced trees are trees with all internal nodes having at least one
+child and all leafs being equidistant from the root. Using algebraic data types,
+one would define them as
+\begin{code}
+  data F a = F0 a | F1 (F (G a))
+  data G a = G0 a | G1 a (G a)
+\end{code}
+or equivalently using generalized algebraic data types
+\begin{code}
+  data F a where
+    F0 :: a -> F a
+    F1 :: F (G a) -> F a
+  data G a where
+    G0 :: a -> G a
+    G1 :: a -> G a -> G a
+\end{code}
+
+\section{Generating function}
+
+The generating function $f(x)$ of general balanced trees satisfies the equations
+\begin{align*}
+  f(x) &= x + f(g(x)) \\
+  g(x) &= x + x g(x)
+\end{align*}
+By noticing that $g(x) = \frac{x}{1-x}$ we can rewrite it as a single equation
+\begin{equation}
+  f(x) = x + f(\frac{x}{1-x})\label{eq:eq1}
+\end{equation}
+The solution to \eqref{eq:eq1} is
+\begin{equation}
+  f(x) = \frac{d}{dx}\ln\Gamma(-\frac{1}{x})\label{eq:eq2}
+\end{equation}
+or written in terms of the digamma function $\psi(x) = \frac{d}{dx}\ln\Gamma(x)
+= \frac{\Gamma^\prime(x)}{\Gamma(x)}$
+$$f(x) = \psi(-\frac{1}{x})$$
+
+\section{Proof}
+
+A quick proof starts with the functional equation of the gamma function
+$$\Gamma(x+1) = x \Gamma(x)$$
+Taking logarithm of both sides of the equation
+$$\ln\Gamma(x+1) = \ln(x) + \ln\Gamma(x)$$
+and differentiating gives
+$$\frac{d}{dx}\ln\Gamma(x+1) = \frac{1}{x} + \frac{d}{dx}\ln\Gamma(x)$$
+By substituting $x \to -\frac{1}{x}$ and rearranging terms we obtain
+$$\frac{d}{dx}\ln\Gamma(-\frac{1}{x}) = x + \frac{d}{dx}\ln\Gamma(1-\frac{1}{x})$$
+Since $g(x) = \frac{x}{1-x}$ we know that $1-\frac{1}{x} = -\frac{1}{g(x)}$ and
+therefore we have
+$$\frac{d}{dx}\ln\Gamma(-\frac{1}{x}) = x + \frac{d}{dx}\ln\Gamma(-\frac{1}{g(x)})$$
+Finally, the substitution $f(x) = \frac{d}{dx}\ln\Gamma(-\frac{1}{x})$ brings us
+to our original equation
+\begin{align*}
+  f(x) &= x + f(g(x)) \\
+  g(x) &= x + x g(x)
+\end{align*}
+
+\end{document}
