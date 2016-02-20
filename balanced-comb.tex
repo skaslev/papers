@@ -1,0 +1,85 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small}
+\DefineVerbatimEnvironment{example}{Verbatim}{fontsize=\small}
+\newcommand{\ignore}[1]{}
+
+\title{Combinatorics of general balanced trees}
+\author{Slavomir Kaslev}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+\begin{code}
+  data F a = F0 a | F1 (F (G a))
+  data G a = G0 a | G1 a (G a)
+\end{code}
+
+The generating function $f(x)$ of general balanced trees satisfies the equations
+\begin{align*}
+  f(x) &= x + f(g(x)) \\
+  g(x) &= x + x g(x)
+\end{align*}
+
+\begin{equation}
+  f(x) = x + \epsilon f(g(x))\label{eq:eq1}
+\end{equation}
+
+$$f(x) = x + \epsilon g(x) + \epsilon^2 g(g(x)) + \epsilon^3 g(g(g(x))) + \dots$$
+
+\begin{align*}
+g^0(x) &= x\\
+g^1(x) &= g(x)\\
+g^n(x) &= g^{n-1}(g(x))
+\end{align*}
+
+\begin{equation}
+f(x) = \sum_{n=0}^{\infty}{g^n(x)} \epsilon^n
+\end{equation}
+
+
+Since
+\begin{equation}
+  g(x) = \frac{x}{1-x}
+\end{equation}
+one can easy show by induction that $\forall n \in \mathbb{N}$
+$$g^n(x) = \frac{x}{1 - n x}$$
+
+Moreover $\forall n \in \mathbb{N}^+$
+$$g^n(x) = \frac{g(n x)}{n} $$
+and $\forall n,m \in \mathbb{N}^{+}$
+$$g^{nm}(x) = \frac{g^n(m x)}{m} = \frac{g^m(n x)}{n}$$
+
+$g^n(x)$ can be expanded in power series
+$$g^n(x) = x + n x^2 + n^2 x^3 + \dots + n^{k-1}x^k + \dots$$
+$\forall k \in \mathbb{N}^{+}$
+$$[x^k] g^n(x) = n^{k-1}$$
+$$[\epsilon^n] f(x) = g^n(x)$$
+$$[x^k\epsilon^n] f(x) = n^{k-1}$$
+
+The functions $g^n(x)$ form a comutative monoid under function composition
+with identity element $g^0(x) = x$ since $\forall n, m, l\in \mathbb{N}$ we have
+$$g^0 \circ g^n = g^n \circ g^0 = g^n$$
+$$g^n \circ g^m = g^m \circ g^n = g^{n+m}$$
+$$(g^n \circ g^m) \circ g^l = g^n \circ (g^m \circ g^l) = g^{n+m+l}$$
+
+$$f(g(x)) = f(x) - x = \sum_{n=1}^{\infty} g^n(x)$$
+$$f(g(x)) = \sum_{n=1}^{\infty} \frac{g(n x)}{n}$$
+$$g(x) = \sum_{m=1}^{\infty} \mu(m) \frac{f(g(m x))}{m}$$
+$$\frac{f(g(m x))}{m} = \sum_{n=1}^{\infty} \frac{g^n(m x)}{m} = \sum_{n=1}^{\infty} g^{n m}(x)$$
+$$g(x) = \sum_{m=1}^{\infty} \mu(m) \sum_{n=1}^{\infty} g^{n m}(x)$$
+Which can quickly be verified by looking at the coefficients in front $x^k$ for $k \in \mathbb{N}^+$
+$$1 = \sum_{m=1}^{\infty} \mu(m) \sum_{n=1}^{\infty} n^{k-1} m^{k-1} = \zeta(1-k) \sum_{m=1}^{\infty} \mu(m) m^{k-1} = \frac{\zeta(1-k)}{\zeta(1-k)}$$
+
+\end{document}
