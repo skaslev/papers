@@ -39,13 +39,13 @@ The generating function $f(x)$ of general balanced trees satisfies the equations
 $$f(x) = x + \epsilon g(x) + \epsilon^2 g(g(x)) + \epsilon^3 g(g(g(x))) + \dots$$
 
 \begin{align*}
-g^0(x) &= x\\
-g^1(x) &= g(x)\\
-g^n(x) &= g^{n-1}(g(x))
+g_0(x) &= x\\
+g_1(x) &= g(x)\\
+g_n(x) &= g_{n-1}(g(x))
 \end{align*}
 
 \begin{equation}
-f(x) = \sum_{n=0}^{\infty}{g^n(x)} \epsilon^n
+f(x) = \sum_{n=0}^{\infty}{g_n(x)} \epsilon^n
 \end{equation}
 
 
@@ -54,31 +54,31 @@ Since
   g(x) = \frac{x}{1-x}
 \end{equation}
 one can easy show by induction that $\forall n \in \mathbb{N}$
-$$g^n(x) = \frac{x}{1 - n x}$$
+$$g_n(x) = \frac{x}{1 - n x}$$
 
 Moreover $\forall n \in \mathbb{N}^+$
-$$g^n(x) = \frac{g(n x)}{n} $$
+$$g_n(x) = \frac{g(n x)}{n} $$
 and $\forall n,m \in \mathbb{N}^{+}$
-$$g^{nm}(x) = \frac{g^n(m x)}{m} = \frac{g^m(n x)}{n}$$
+$$g_{nm}(x) = \frac{g_n(m x)}{m} = \frac{g_m(n x)}{n}$$
 
-$g^n(x)$ can be expanded in power series
-$$g^n(x) = x + n x^2 + n^2 x^3 + \dots + n^{k-1}x^k + \dots$$
+$g_n(x)$ can be expanded in power series
+$$g_n(x) = x + n x^2 + n^2 x^3 + \dots + n^{k-1}x^k + \dots$$
 $\forall k \in \mathbb{N}^{+}$
-$$[x^k] g^n(x) = n^{k-1}$$
-$$[\epsilon^n] f(x) = g^n(x)$$
+$$[x^k] g_n(x) = n^{k-1}$$
+$$[\epsilon^n] f(x) = g_n(x)$$
 $$[x^k\epsilon^n] f(x) = n^{k-1}$$
 
-The functions $g^n(x)$ form a comutative monoid under function composition
-with identity element $g^0(x) = x$ since $\forall n, m, l\in \mathbb{N}$ we have
-$$g^0 \circ g^n = g^n \circ g^0 = g^n$$
-$$g^n \circ g^m = g^m \circ g^n = g^{n+m}$$
-$$(g^n \circ g^m) \circ g^l = g^n \circ (g^m \circ g^l) = g^{n+m+l}$$
+The functions $g_n(x)$ form a comutative monoid under function composition
+with identity element $g_0(x) = x$ since $\forall n, m, l\in \mathbb{N}$ we have
+$$g_0 \circ g_n = g_n \circ g_0 = g_n$$
+$$g_n \circ g_m = g_m \circ g_n = g_{n+m}$$
+$$(g_n \circ g_m) \circ g_l = g_n \circ (g_m \circ g_l) = g_{n+m+l}$$
 
-$$f(g(x)) = f(x) - x = \sum_{n=1}^{\infty} g^n(x)$$
+$$f(g(x)) = f(x) - x = \sum_{n=1}^{\infty} g_n(x)$$
 $$f(g(x)) = \sum_{n=1}^{\infty} \frac{g(n x)}{n}$$
 $$g(x) = \sum_{m=1}^{\infty} \mu(m) \frac{f(g(m x))}{m}$$
-$$\frac{f(g(m x))}{m} = \sum_{n=1}^{\infty} \frac{g^n(m x)}{m} = \sum_{n=1}^{\infty} g^{n m}(x)$$
-$$g(x) = \sum_{m=1}^{\infty} \mu(m) \sum_{n=1}^{\infty} g^{n m}(x)$$
+$$\frac{f(g(m x))}{m} = \sum_{n=1}^{\infty} \frac{g_n(m x)}{m} = \sum_{n=1}^{\infty} g_{n m}(x)$$
+$$g(x) = \sum_{m=1}^{\infty} \mu(m) \sum_{n=1}^{\infty} g_{n m}(x)$$
 Which can quickly be verified by looking at the coefficients in front $x^k$ for $k \in \mathbb{N}^+$
 $$1 = \sum_{m=1}^{\infty} \mu(m) \sum_{n=1}^{\infty} n^{k-1} m^{k-1} = \zeta(1-k) \sum_{m=1}^{\infty} \mu(m) m^{k-1} = \frac{\zeta(1-k)}{\zeta(1-k)}$$
 
