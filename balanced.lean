@@ -1,8 +1,9 @@
--- f(x) = x + f(g(x))
+-- f(x) = x + f(g(x)) ↔ f(x) = Σ n:ℕ, gⁿ(x)
 inductive F (g : Type → Type) : Type → Type 1
 | F0 : Π {α}, α → F α
 | F1 : Π {α}, F (g α) → F α
 
+-- g(x) = x + g(x) ↔ g(x) = x/(1-x)
 inductive G α : Type
 | G0 : α → G
 | G1 : α → G → G
@@ -15,9 +16,10 @@ def diter {β : Type → Type 1} {γ : Type → Type} (g : Π {α}, β (γ α) �
 | nat.zero α := id
 | (nat.succ n) α := g ∘ diter n
 
+-- s(x) = Σ n:ℕ, gⁿ(x)
 def S g α := Σ n : ℕ, iter g n α
 
--- f(x) = Σ n:ℕ, gⁿ(x)
+-- f(x) = s(x)
 def from_s {g α} (x : S g α) : F g α :=
 diter (@F.F1 g) x.1 (F.F0 g x.2)
 
@@ -42,3 +44,9 @@ begin
   { dsimp [diter], refl },
   { dsimp [diter], rw ih }
 end
+
+structure {u v} iso (α : Type u) (β : Type v) :=
+(f : α → β) (g : β → α) (gf : Π x, g (f x) = x) (fg : Π x, f (g x) = x)
+
+def sf_iso {g α} : iso (S g α) (F g α) :=
+⟨from_s, to_s, to_s_from_s, from_s_to_s⟩
