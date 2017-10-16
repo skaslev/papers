@@ -3,7 +3,7 @@ inductive F (g : Type → Type) : Type → Type 1
 | F0 : Π {α}, α → F α
 | F1 : Π {α}, F (g α) → F α
 
--- g(x) = x + g(x) ↔ g(x) = x/(1-x)
+-- g(x) = x + x g(x) ↔ g(x) = x/(1-x)
 inductive G α : Type
 | G0 : α → G
 | G1 : α → G → G
