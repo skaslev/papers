@@ -50,3 +50,7 @@ structure {u v} iso (α : Type u) (β : Type v) :=
 
 def sf_iso {g α} : iso (S g α) (F g α) :=
 ⟨from_s, to_s, to_s_from_s, from_s_to_s⟩
+
+
+def fins k n : nat : Type := fin k → fin n
+-- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
