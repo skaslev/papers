@@ -51,6 +51,27 @@ structure {u v} iso (α : Type u) (β : Type v) :=
 def sf_iso {g α} : iso (S g α) (F g α) :=
 ⟨from_s, to_s, to_s_from_s, from_s_to_s⟩
 
+def iso_inv {α β} : iso α β → iso β α
+| ⟨f, g, gf, fg⟩ := ⟨g, f, fg, gf⟩
 
-def fins k n : nat : Type := fin k → fin n
+def iso_comp {α β γ} : iso α β → iso β γ → iso α γ
+| ⟨f₀, g₀, gf₀, fg₀⟩ ⟨f₁, g₁, gf₁, fg₁⟩ :=
+⟨f₁ ∘ f₀, g₀ ∘ g₁, by simp [gf₁, gf₀], by simp [fg₀, fg₁]⟩
+
+def fins (k n : nat) := fin k → fin n
+
 -- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
+-- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins k n
+-- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
+
+def gn_iso (n:ℕ) : iso (iter G n unit) (Σ k:ℕ, fins k n) :=
+sorry
+
+def f_iso : iso (F G unit) (Σ n k:ℕ, fins k n) :=
+begin
+  constructor,
+  {
+    intros,
+  },
+
+end
