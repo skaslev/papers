@@ -64,20 +64,20 @@ def iso_comp {α β γ} : iso α β → iso β γ → iso α γ
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
 
-def fins (k n : nat) := fin k → fin n
+def fins (k n : ℕ) := fin k → fin n
 
 -- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
 -- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins k n
 -- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
 
-def gn_iso (n:ℕ) : iso (iter G n unit) (Σ k:ℕ, fins k n) :=
+def gn_iso (n : ℕ) : iso (iter G n unit) (Σ k : ℕ, fins k n) :=
 sorry
 
-def s_iso : iso (S G unit) (Σ n k:ℕ, fins k n) :=
+def s_iso : iso (S G unit) (Σ n k : ℕ, fins k n) :=
 ⟨ λ s, ⟨s.1, (gn_iso s.1).f s.2⟩,
   λ s, ⟨s.1, (gn_iso s.1).g s.2⟩,
   by intros s; simp [(gn_iso s.1).gf],
   by intros s; simp [(gn_iso s.1).fg] ⟩
 
-def f_iso : iso (F G unit) (Σ n k:ℕ, fins k n) :=
+def f_iso : iso (F G unit) (Σ n k : ℕ, fins k n) :=
 iso_comp (iso_inv sf_iso) s_iso
