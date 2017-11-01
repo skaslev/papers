@@ -71,8 +71,8 @@ def iso_comp {α β γ} : iso α β → iso β γ → iso α γ
 -- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
 
 def countG1 {α} : G α → ℕ
-| (G.G0 x) := 0
-| (G.G1 x xs) := 1 + countG1 xs
+| (G.G0 x) := nat.zero
+| (G.G1 x xs) := nat.succ (countG1 xs)
 
 def append {α} : G α → G α → G α
 | (G.G0 x) ys := G.G1 x ys
@@ -94,10 +94,10 @@ end
 @[reducible] def mkGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
 ⟨countG1 (leafs x), x, rfl⟩
 
-def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (k+1) α :=
+def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (nat.succ k) α :=
 sorry
 
-def pull (n k : ℕ) {α} (a : α) : Gnk n (k+1) α → fin n × Gnk n k α :=
+def pull (n k : ℕ) {α} (a : α) : Gnk n (nat.succ k) α → fin n × Gnk n k α :=
 sorry
 
 def encode' {n k : ℕ} (x : fins k n) : Gnk n k unit :=
