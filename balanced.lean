@@ -123,7 +123,8 @@ by simp [encode, decode, encode_decode']
 
 def decode_encode {n : ℕ} (x : Σ k : ℕ, fins k n) : decode (encode x) = x :=
 begin
-  simp [encode, decode],
+  induction x with k x,
+  dsimp [encode, decode],
   admit
 end
 
