@@ -24,7 +24,7 @@ def from_s {g α} (x : S g α) : F g α :=
 diter (@F.F1 g) x.1 (F.F0 g x.2)
 
 def to_s {g α} (x : F g α) : S g α :=
-F.rec (λ α a, ⟨0, a⟩) (λ α a ih, ⟨nat.succ ih.1, ih.2⟩) x
+F.rec (λ α a, ⟨nat.zero, a⟩) (λ α a ih, ⟨nat.succ ih.1, ih.2⟩) x
 
 attribute [simp] function.comp
 
@@ -34,7 +34,7 @@ begin
   induction x with n x,
   induction n with m ih generalizing α,
   { dsimp [diter], refl },
-  { dsimp [diter], rw ih x }
+  { dsimp [diter], rw ih }
 end
 
 def from_s_to_s {g α} (x : F g α) : from_s (to_s x) = x :=
