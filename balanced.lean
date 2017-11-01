@@ -93,14 +93,34 @@ end
 @[reducible] def mkGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
 ⟨countG₁ (leafs x), x, rfl⟩
 
-def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (nat.succ k) α :=
+@[reducible] def Gn0 (n : ℕ) (α : Type) : Gnk n 0 α :=
+sorry
+-- match n with
+-- | nat.zero := begin dsimp,
+-- | (nat.succ n) := _
+-- end
+
+def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n k.succ α :=
 sorry
 
-def pull (n k : ℕ) {α} (a : α) : Gnk n (nat.succ k) α → fin n × Gnk n k α :=
+def pull (n k : ℕ) {α} (a : α) : Gnk n k.succ α → fin n × Gnk n k α :=
 sorry
+
+@[simp] def {u} fold (α : ℕ → Type u) : Π (n : ℕ), (Π (k:ℕ) (h:k<n), α k → α k.succ) → α nat.zero → α n
+| nat.zero := λ f a, a
+| (nat.succ k) := λ f a, f k (nat.lt.base k) (fold k 
+  (λ l h g, f l (lt_trans h (nat.lt.base k)) g) a)
+
+section
+variables (n:ℕ)
+#reduce (Gn0 1 unit)
+end
 
 def encode' {n k : ℕ} (x : fins k n) : Gnk n k unit :=
-sorry
+fold
+  (λ l, Gnk n l unit) k
+  (λ l h gnl, push n l unit.star ⟨x ⟨l, h⟩, gnl⟩)
+  (Gn0 n unit)
 
 def decode' {n k : ℕ} (x : Gnk n k unit) : fins k n :=
 sorry
