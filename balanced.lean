@@ -70,18 +70,34 @@ def iso_comp {α β γ} : iso α β → iso β γ → iso α γ
 -- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins k n
 -- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
 
-def leafs {n α} (t : iter G n α) : ℕ :=
-sorry
+def len {α} : G α → ℕ
+| (G.G0 x) := 1
+| (G.G1 x xs) := 1 + len xs
 
-@[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, leafs t = k
+def append {α} : G α → G α → G α
+| (G.G0 x) ys := G.G1 x ys
+| (G.G1 x xs) ys := G.G1 x (append xs ys)
+
+def join {α} : G (G α) → G α
+| (G.G0 x) := x
+| (G.G1 x xs) := append x (join xs)
+
+def leafs {n α} (t : iter G n α) : G α :=
+begin
+  induction n with n ih generalizing α,
+  { exact G.G0 t },
+  { exact join (ih t) }
+end
+
+@[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, len (leafs t) = k
 
 def toGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
-⟨leafs x, x, rfl⟩
+⟨len (leafs x), x, rfl⟩
 
-def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (k+1) α :=
+def push (n k : ℕ) {α} (a : α) : fin n × Gnk n (k+1) α → Gnk n (k+2) α :=
 sorry
 
-def pull (n k : ℕ) {α} (a : α) : Gnk n (k+1) α → fin n × Gnk n k α :=
+def pull (n k : ℕ) {α} (a : α) : Gnk n (k+2) α → fin n × Gnk n (k+1) α :=
 sorry
 
 def encodef' {n k : ℕ} (x : fins k n) : Gnk n (k+1) unit :=
