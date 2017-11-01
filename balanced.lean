@@ -91,7 +91,7 @@ end
 
 @[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, countG1 (leafs t) = k
 
-def toGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
+@[reducible] def mkGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
 ⟨countG1 (leafs x), x, rfl⟩
 
 def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (k+1) α :=
@@ -100,32 +100,35 @@ sorry
 def pull (n k : ℕ) {α} (a : α) : Gnk n (k+1) α → fin n × Gnk n k α :=
 sorry
 
-def encodef' {n k : ℕ} (x : fins k n) : Gnk n k unit :=
+def encode' {n k : ℕ} (x : fins k n) : Gnk n k unit :=
 sorry
 
-def decodef' {n k : ℕ} (x : Gnk n k unit) : fins k n :=
+def decode' {n k : ℕ} (x : Gnk n k unit) : fins k n :=
 sorry
 
-def encodef_decodef' {n k : ℕ} (x : Gnk n k unit) : encodef' (decodef' x) = x :=
+def encode_decode' {n k : ℕ} (x : Gnk n k unit) : encode' (decode' x) = x :=
 sorry
 
-def decodef_encodef' {n k : ℕ} (x : fins k n) : decodef' (encodef' x) = x :=
+def decode_encode' {n k : ℕ} (x : fins k n) : decode' (encode' x) = x :=
 sorry
 
-def encodef {n : ℕ} (x : Σ k : ℕ, fins k n) : iter G n unit :=
-(encodef' x.2).1
+def encode {n : ℕ} (x : Σ k : ℕ, fins k n) : iter G n unit :=
+(encode' x.2).1
 
-def decodef {n : ℕ} (x : iter G n unit) : Σ k : ℕ, fins k n :=
-let y := toGnk x in ⟨y.1, decodef' y.2⟩
+def decode {n : ℕ} (x : iter G n unit) : Σ k : ℕ, fins k n :=
+let y := mkGnk x in ⟨y.1, decode' y.2⟩
 
-def encodef_decodef {n : ℕ} (x : iter G n unit) : encodef (decodef x) = x :=
-sorry
+def encode_decode {n : ℕ} (x : iter G n unit) : encode (decode x) = x :=
+by simp [encode, decode, encode_decode']
 
-def decodef_encodef {n : ℕ} (x : Σ k : ℕ, fins k n) : decodef (encodef x) = x :=
-sorry
+def decode_encode {n : ℕ} (x : Σ k : ℕ, fins k n) : decode (encode x) = x :=
+begin
+  simp [encode, decode],
+  admit
+end
 
 def gn_iso (n : ℕ) : iso (iter G n unit) (Σ k : ℕ, fins k n) :=
-⟨decodef, encodef, encodef_decodef, decodef_encodef⟩
+⟨decode, encode, encode_decode, decode_encode⟩
 
 def s_iso : iso (S G unit) (Σ n k : ℕ, fins k n) :=
 ⟨ λ s, ⟨s.1, (gn_iso s.1).f s.2⟩,
