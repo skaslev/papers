@@ -51,12 +51,11 @@ structure {u v} iso (α : Type u) (β : Type v) :=
 def sf_iso {g α} : iso (S g α) (F g α) :=
 ⟨from_s, to_s, to_s_from_s, from_s_to_s⟩
 
-def iso_inv {α β} : iso α β → iso β α
-| ⟨f, g, gf, fg⟩ := ⟨g, f, fg, gf⟩
+def iso_inv {α β} (i : iso α β) : iso β α :=
+⟨i.g, i.f, i.fg, i.gf⟩
 
-def iso_comp {α β γ} : iso α β → iso β γ → iso α γ
-| ⟨f₀, g₀, gf₀, fg₀⟩ ⟨f₁, g₁, gf₁, fg₁⟩ :=
-⟨f₁ ∘ f₀, g₀ ∘ g₁, by simp [gf₁, gf₀], by simp [fg₀, fg₁]⟩
+def iso_comp {α β γ} (i : iso α β) (j : iso β γ) : iso α γ :=
+⟨j.f ∘ i.f, i.g ∘ j.g, by simp [j.gf, i.gf], by simp [i.fg, j.fg]⟩
 
 @[simp] lemma prod.mk.eta {α β} : Π {p : α × β}, (p.1, p.2) = p
 | (a, b) := rfl
