@@ -70,16 +70,16 @@ def iso_comp {α β γ} : iso α β → iso β γ → iso α γ
 -- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins k n
 -- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
 
-def len {α} : G α → ℕ
-| (G.G0 x) := 1
-| (G.G1 x xs) := 1 + len xs
+def lenm1 {α} : G α → ℕ
+| (G.G0 x) := 0
+| (G.G1 x xs) := 1 + lenm1 xs
 
-def len_neq_zero {α} {x : G α} : len x ≠ 0 :=
-begin
-  cases x,
-  { exact nat.one_ne_zero },
-  { exact λ h, nat.one_ne_zero (nat.eq_zero_of_add_eq_zero_right h) }
-end
+-- def len_neq_zero {α} {x : G α} : len x ≠ 0 :=
+-- begin
+--   cases x,
+--   { exact nat.one_ne_zero },
+--   { exact λ h, nat.one_ne_zero (nat.eq_zero_of_add_eq_zero_right h) }
+-- end
 
 def append {α} : G α → G α → G α
 | (G.G0 x) ys := G.G1 x ys
@@ -96,24 +96,24 @@ begin
   { exact join (ih x) }
 end
 
-@[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, len (leafs t) = k
+@[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, lenm1 (leafs t) = k
 
 def toGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
-⟨len (leafs x), x, rfl⟩
+⟨lenm1 (leafs x), x, rfl⟩
 
-def push (n k : ℕ) {α} (a : α) : fin n × Gnk n (k+1) α → Gnk n (k+2) α :=
+def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (k+1) α :=
 sorry
 
-def pull (n k : ℕ) {α} (a : α) : Gnk n (k+2) α → fin n × Gnk n (k+1) α :=
+def pull (n k : ℕ) {α} (a : α) : Gnk n (k+1) α → fin n × Gnk n k α :=
 sorry
 
-def encodef' {n k : ℕ} (x : fins k n) : Gnk n (k+1) unit :=
+def encodef' {n k : ℕ} (x : fins k n) : Gnk n k unit :=
 sorry
 
-def decodef' {n k : ℕ} (x : Gnk n (k+1) unit) : fins k n :=
+def decodef' {n k : ℕ} (x : Gnk n k unit) : fins k n :=
 sorry
 
-def encodef_decodef' {n k : ℕ} (x : Gnk n (k+1) unit) : encodef' (decodef' x) = x :=
+def encodef_decodef' {n k : ℕ} (x : Gnk n k unit) : encodef' (decodef' x) = x :=
 sorry
 
 def decodef_encodef' {n k : ℕ} (x : fins k n) : decodef' (encodef' x) = x :=
@@ -123,13 +123,7 @@ def encodef {n : ℕ} (x : Σ k : ℕ, fins k n) : iter G n unit :=
 (encodef' x.2).1
 
 def decodef {n : ℕ} (x : iter G n unit) : Σ k : ℕ, fins k n :=
-begin
-  have y := toGnk x,
-  induction y with l y,
-  induction l with l ih,
-  { admit },
-  { exact ⟨l, decodef' y⟩ }
-end
+let y := toGnk x in ⟨y.1, decodef' y.2⟩
 
 def encodef_decodef {n : ℕ} (x : iter G n unit) : encodef (decodef x) = x :=
 sorry
