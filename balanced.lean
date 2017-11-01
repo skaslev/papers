@@ -1,12 +1,12 @@
 -- f(x) = x + f(g(x)) ↔ f(x) = Σ n:ℕ, gⁿ(x)
 inductive F (g : Type → Type) : Type → Type 1
-| F0 : Π {α}, α → F α
-| F1 : Π {α}, F (g α) → F α
+| F₀ : Π {α}, α → F α
+| F₁ : Π {α}, F (g α) → F α
 
 -- g(x) = x + x g(x) ↔ g(x) = x/(1-x) ↔ gⁿ(x) = x/(1-nx)
 inductive G α : Type
-| G0 : α → G
-| G1 : α → G → G
+| G₀ : α → G
+| G₁ : α → G → G
 
 def iter {α} (g : α → α) : ℕ → α → α
 | nat.zero := id
@@ -21,7 +21,7 @@ def S g α := Σ n : ℕ, iter g n α
 
 -- f(x) = s(x)
 def from_s {g α} (x : S g α) : F g α :=
-diter (@F.F1 g) x.1 (F.F0 g x.2)
+diter (@F.F₁ g) x.1 (F.F₀ g x.2)
 
 def to_s {g α} (x : F g α) : S g α :=
 F.rec (λ α a, ⟨nat.zero, a⟩) (λ α a ih, ⟨nat.succ ih.1, ih.2⟩) x
@@ -70,29 +70,29 @@ def iso_comp {α β γ} : iso α β → iso β γ → iso α γ
 -- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins k n
 -- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
 
-def countG1 {α} : G α → ℕ
-| (G.G0 x) := nat.zero
-| (G.G1 x xs) := nat.succ (countG1 xs)
+def countG₁ {α} : G α → ℕ
+| (G.G₀ x) := nat.zero
+| (G.G₁ x xs) := nat.succ (countG₁ xs)
 
 def append {α} : G α → G α → G α
-| (G.G0 x) ys := G.G1 x ys
-| (G.G1 x xs) ys := G.G1 x (append xs ys)
+| (G.G₀ x) ys := G.G₁ x ys
+| (G.G₁ x xs) ys := G.G₁ x (append xs ys)
 
 def join {α} : G (G α) → G α
-| (G.G0 x) := x
-| (G.G1 x xs) := append x (join xs)
+| (G.G₀ x) := x
+| (G.G₁ x xs) := append x (join xs)
 
 def leafs {n α} (x : iter G n α) : G α :=
 begin
   induction n with n ih generalizing α,
-  { exact G.G0 x },
+  { exact G.G₀ x },
   { exact join (ih x) }
 end
 
-@[reducible] def Gnk (n k : ℕ) α := Σ' x : iter G n α, countG1 (leafs x) = k
+@[reducible] def Gnk (n k : ℕ) α := Σ' x : iter G n α, countG₁ (leafs x) = k
 
 @[reducible] def mkGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
-⟨countG1 (leafs x), x, rfl⟩
+⟨countG₁ (leafs x), x, rfl⟩
 
 def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (nat.succ k) α :=
 sorry
