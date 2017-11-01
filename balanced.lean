@@ -89,7 +89,7 @@ begin
   { exact join (ih x) }
 end
 
-@[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, countG1 (leafs t) = k
+@[reducible] def Gnk (n k : ℕ) α := Σ' x : iter G n α, countG1 (leafs x) = k
 
 @[reducible] def mkGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
 ⟨countG1 (leafs x), x, rfl⟩
