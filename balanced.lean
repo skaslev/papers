@@ -74,6 +74,13 @@ def len {α} : G α → ℕ
 | (G.G0 x) := 1
 | (G.G1 x xs) := 1 + len xs
 
+def len_neq_zero {α} {x : G α} : len x ≠ 0 :=
+begin
+  cases x,
+  { exact nat.one_ne_zero },
+  { exact λ h, nat.one_ne_zero (nat.eq_zero_of_add_eq_zero_right h) }
+end
+
 def append {α} : G α → G α → G α
 | (G.G0 x) ys := G.G1 x ys
 | (G.G1 x xs) ys := G.G1 x (append xs ys)
@@ -82,11 +89,11 @@ def join {α} : G (G α) → G α
 | (G.G0 x) := x
 | (G.G1 x xs) := append x (join xs)
 
-def leafs {n α} (t : iter G n α) : G α :=
+def leafs {n α} (x : iter G n α) : G α :=
 begin
   induction n with n ih generalizing α,
-  { exact G.G0 t },
-  { exact join (ih t) }
+  { exact G.G0 x },
+  { exact join (ih x) }
 end
 
 @[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, len (leafs t) = k
