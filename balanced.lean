@@ -70,16 +70,9 @@ def iso_comp {α β γ} : iso α β → iso β γ → iso α γ
 -- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins k n
 -- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
 
-def lenm1 {α} : G α → ℕ
+def countG1 {α} : G α → ℕ
 | (G.G0 x) := 0
-| (G.G1 x xs) := 1 + lenm1 xs
-
--- def len_neq_zero {α} {x : G α} : len x ≠ 0 :=
--- begin
---   cases x,
---   { exact nat.one_ne_zero },
---   { exact λ h, nat.one_ne_zero (nat.eq_zero_of_add_eq_zero_right h) }
--- end
+| (G.G1 x xs) := 1 + countG1 xs
 
 def append {α} : G α → G α → G α
 | (G.G0 x) ys := G.G1 x ys
@@ -96,10 +89,10 @@ begin
   { exact join (ih x) }
 end
 
-@[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, lenm1 (leafs t) = k
+@[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, countG1 (leafs t) = k
 
 def toGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
-⟨lenm1 (leafs x), x, rfl⟩
+⟨countG1 (leafs x), x, rfl⟩
 
 def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (k+1) α :=
 sorry
