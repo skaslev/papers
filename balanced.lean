@@ -64,14 +64,37 @@ def iso_comp {α β γ} : iso α β → iso β γ → iso α γ
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
 
-def fins (k n : ℕ) := fin k → fin n
+@[reducible] def fins (k n : ℕ) := fin k → fin n
 
 -- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
 -- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins k n
 -- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
 
-def gn_iso (n : ℕ) : iso (iter G n unit) (Σ k : ℕ, fins k n) :=
+def leafs {n α} (t : iter G n α) : ℕ :=
 sorry
+
+@[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, leafs t = k
+
+def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (k+1) α :=
+sorry
+
+def pull (n k : ℕ) {α} (a : α) : Gnk n (k+1) α → fin n × Gnk n k α :=
+sorry
+
+def encodef {n : ℕ} (x : Σ k : ℕ, fins k n) : iter G n unit :=
+sorry
+
+def decodef {n : ℕ} (x : iter G n unit) : Σ k : ℕ, fins k n :=
+sorry
+
+def encodef_decodef {n : ℕ} (x : iter G n unit) : encodef (decodef x) = x :=
+sorry
+
+def decodef_encodef {n : ℕ} (x : Σ k : ℕ, fins k n) : decodef (encodef x) = x :=
+sorry
+
+def gn_iso (n : ℕ) : iso (iter G n unit) (Σ k : ℕ, fins k n) :=
+⟨decodef, encodef, encodef_decodef, decodef_encodef⟩
 
 def s_iso : iso (S G unit) (Σ n k : ℕ, fins k n) :=
 ⟨ λ s, ⟨s.1, (gn_iso s.1).f s.2⟩,
