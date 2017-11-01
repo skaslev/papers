@@ -106,9 +106,9 @@ sorry
 def pull (n k : ℕ) {α} (a : α) : Gnk n k.succ α → fin n × Gnk n k α :=
 sorry
 
-@[simp] def {u} fold (α : ℕ → Type u) : Π (n : ℕ), (Π (k:ℕ) (h:k<n), α k → α k.succ) → α nat.zero → α n
+@[simp] def {u} fold (α : ℕ → Type u) : Π n : ℕ, (Π k : ℕ, k < n → α k → α k.succ) → α nat.zero → α n
 | nat.zero := λ f a, a
-| (nat.succ k) := λ f a, f k (nat.lt.base k) (fold k 
+| (nat.succ k) := λ f a, f k (nat.lt.base k) (fold k
   (λ l h g, f l (lt_trans h (nat.lt.base k)) g) a)
 
 section
