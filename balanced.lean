@@ -75,17 +75,38 @@ sorry
 
 @[reducible] def Gnk (n k : ℕ) α := Σ' t : iter G n α, leafs t = k
 
+def toGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
+⟨leafs x, x, rfl⟩
+
 def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n (k+1) α :=
 sorry
 
 def pull (n k : ℕ) {α} (a : α) : Gnk n (k+1) α → fin n × Gnk n k α :=
 sorry
 
-def encodef {n : ℕ} (x : Σ k : ℕ, fins k n) : iter G n unit :=
+def encodef' {n k : ℕ} (x : fins k n) : Gnk n (k+1) unit :=
 sorry
 
-def decodef {n : ℕ} (x : iter G n unit) : Σ k : ℕ, fins k n :=
+def decodef' {n k : ℕ} (x : Gnk n (k+1) unit) : fins k n :=
 sorry
+
+def encodef_decodef' {n k : ℕ} (x : Gnk n (k+1) unit) : encodef' (decodef' x) = x :=
+sorry
+
+def decodef_encodef' {n k : ℕ} (x : fins k n) : decodef' (encodef' x) = x :=
+sorry
+
+def encodef {n : ℕ} (x : Σ k : ℕ, fins k n) : iter G n unit :=
+(encodef' x.2).1
+
+def decodef {n : ℕ} (x : iter G n unit) : Σ k : ℕ, fins k n :=
+begin
+  have y := toGnk x,
+  induction y with l y,
+  induction l with l ih,
+  { admit },
+  { exact ⟨l, decodef' y⟩ }
+end
 
 def encodef_decodef {n : ℕ} (x : iter G n unit) : encodef (decodef x) = x :=
 sorry
