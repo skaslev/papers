@@ -63,11 +63,11 @@ def iso_comp {α β γ} (i : iso α β) (j : iso β γ) : iso α γ :=
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
 
-@[reducible] def fins (k n : ℕ) := fin k → fin n
+@[reducible] def fins (n k : ℕ) := fin k → fin n
 
 -- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
--- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins k n
--- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
+-- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins n k
+-- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins n k
 
 def countG₁ {α} : G α → ℕ
 | (G.G₀ x) := nat.zero
@@ -96,7 +96,7 @@ end
 @[reducible] def Gn0 (n : ℕ) (α : Type) : Gnk n 0 α :=
 sorry
 
-def fins₀ n : ℕ : fins 0 n :=
+def fins₀ n : ℕ : fins n 0 :=
 sorry
 
 def push (n k : ℕ) : fin n × Gnk n k unit → Gnk n k.succ unit :=
@@ -111,61 +111,54 @@ def {u} fold (α : ℕ → Type u) : Π n : ℕ, (Π k : ℕ, k < n → α k →
 | (nat.succ n) := λ f a, f n (nat.lt.base n) (fold n
   (λ l h g, f l (lt_trans h (nat.lt.base n)) g) a)
 
-@[simp]
-def {u} unfold (α : ℕ → Type u) : Π n : ℕ, (Π k : ℕ, k < n → α k.succ → α k) → α n → α nat.zero
-| nat.zero := λ f a, a
-| (nat.succ n) := λ f a, unfold n
-  (λ l h g, f l (lt_trans h (nat.lt.base n)) g)
-  (f n (nat.lt.base n) a)
-
-def encode' {n k : ℕ} (x : fins k n) : Gnk n k unit :=
+def encode' {n k : ℕ} (x : fins n k) : Gnk n k unit :=
 fold
   (λ l, Gnk n l unit) k
   (λ l h g, push n l ⟨x ⟨l, h⟩, g⟩)
   (Gn0 n unit)
 
-def decode' {n k : ℕ} (x : Gnk n k unit) : fins k n :=
--- sorry
-unfold
-  (λ l, fins l n) k
-  begin-- (λ l h g, (pull n l x.1))
-    intros l h g,
+def decode' {n k : ℕ} (x : Gnk n k unit) : fins n k :=
+fold
+  (λ l, fins n l) k
+  (λ l h g,
+  begin
     have y := pull n l,
+    have z := g ⟨l, h⟩,
     induction x with x h,
     admit
-  end
+  end)
   (fins₀ n)
 
 def encode_decode' {n k : ℕ} (x : Gnk n k unit) : encode' (decode' x) = x :=
 sorry
 
-def decode_encode' {n k : ℕ} (x : fins k n) : decode' (encode' x) = x :=
+def decode_encode' {n k : ℕ} (x : fins n k) : decode' (encode' x) = x :=
 sorry
 
-def encode {n : ℕ} (x : Σ k : ℕ, fins k n) : iter G n unit :=
+def encode {n : ℕ} (x : Σ k : ℕ, fins n k) : iter G n unit :=
 (encode' x.2).1
 
-def decode {n : ℕ} (x : iter G n unit) : Σ k : ℕ, fins k n :=
+def decode {n : ℕ} (x : iter G n unit) : Σ k : ℕ, fins n k :=
 let y := mkGnk x in ⟨y.1, decode' y.2⟩
 
 def encode_decode {n : ℕ} (x : iter G n unit) : encode (decode x) = x :=
 by simp [encode, decode, encode_decode']
 
-def decode_encode {n : ℕ} (x : Σ k : ℕ, fins k n) : decode (encode x) = x :=
+def decode_encode {n : ℕ} (x : Σ k : ℕ, fins n k) : decode (encode x) = x :=
 begin
   induction x with k x,
   dsimp [encode, decode],
   admit
 end
 
-def gn_iso (n : ℕ) : iso (iter G n unit) (Σ k : ℕ, fins k n) :=
+def gn_iso (n : ℕ) : iso (iter G n unit) (Σ k : ℕ, fins n k) :=
 ⟨decode, encode, encode_decode, decode_encode⟩
 
-def s_iso : iso (S G unit) (Σ n k : ℕ, fins k n) :=
+def s_iso : iso (S G unit) (Σ n k : ℕ, fins n k) :=
 ⟨ λ s, ⟨s.1, (gn_iso s.1).f s.2⟩,
   λ s, ⟨s.1, (gn_iso s.1).g s.2⟩,
   by intros s; simp [(gn_iso s.1).gf],
   by intros s; simp [(gn_iso s.1).fg] ⟩
 
-def f_iso : iso (F G unit) (Σ n k : ℕ, fins k n) :=
+def f_iso : iso (F G unit) (Σ n k : ℕ, fins n k) :=
 iso_comp (iso_inv sf_iso) s_iso
