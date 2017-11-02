@@ -96,10 +96,13 @@ end
 @[reducible] def Gn0 (n : ℕ) (α : Type) : Gnk n 0 α :=
 sorry
 
-def push (n k : ℕ) {α} (a : α) : fin n × Gnk n k α → Gnk n k.succ α :=
+def fins₀ n : ℕ : fins 0 n :=
 sorry
 
-def pull (n k : ℕ) {α} (a : α) : Gnk n k.succ α → fin n × Gnk n k α :=
+def push (n k : ℕ) : fin n × Gnk n k unit → Gnk n k.succ unit :=
+sorry
+
+def pull (n k : ℕ) : Gnk n k.succ unit → fin n × Gnk n k unit :=
 sorry
 
 @[simp]
@@ -118,11 +121,20 @@ def {u} unfold (α : ℕ → Type u) : Π n : ℕ, (Π k : ℕ, k < n → α k.s
 def encode' {n k : ℕ} (x : fins k n) : Gnk n k unit :=
 fold
   (λ l, Gnk n l unit) k
-  (λ l h gnl, push n l unit.star ⟨x ⟨l, h⟩, gnl⟩)
+  (λ l h g, push n l ⟨x ⟨l, h⟩, g⟩)
   (Gn0 n unit)
 
 def decode' {n k : ℕ} (x : Gnk n k unit) : fins k n :=
-sorry
+-- sorry
+unfold
+  (λ l, fins l n) k
+  begin-- (λ l h g, (pull n l x.1))
+    intros l h g,
+    have y := pull n l,
+    induction x with x h,
+    admit
+  end
+  (fins₀ n)
 
 def encode_decode' {n k : ℕ} (x : Gnk n k unit) : encode' (decode' x) = x :=
 sorry
