@@ -245,11 +245,8 @@ def f_iso : iso (F G unit) (Σ n k : ℕ, fins n k) :=
 iso_comp (iso_inv sf_iso) s_iso
 
 def power (x : Type) : ℕ → Type
-| nat.zero := unit
-| (nat.succ n) := x × (power n)
+| 0 := unit
+| 1 := x
+| (n+2) := x × (power (n+1))
 
 def pseries (s : ℕ → ℕ) (x : Type) := Σ n:ℕ, fin (s n) × power x n
-
-#check @fin.pred
-def ls := @from_fins 3 ⟨2, (λ x, fin.pred (fin.succ (fin.succ x)) sorry)⟩
-#eval ls
