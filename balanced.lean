@@ -62,7 +62,24 @@ def fiber {α β} (f : α → β) (y : β) := Σ' x, f(x) = y
 def iscontr α := Σ' x : α, Π y : α, x = y
 
 structure {u v} eqv (α : Type u) (β : Type v) :=
-(f : α → β) (fcontr : Π y, iscontr (fiber f y))
+(f : α → β) (h : Π y, iscontr (fiber f y))
+
+@[simp] def {u v} iso_fiber {α : Type u} {β : Type v} (i : iso α β) (y : β) : fiber i.f y :=
+⟨i.g y, i.fg y⟩
+
+def {u v} iso_eqv {α : Type u} {β : Type v} (i : iso α β) : eqv α β :=
+⟨i.f, (λ y, ⟨iso_fiber i y, (λ ⟨x, h⟩, by simp [h.symm, i.gf])⟩)⟩
+
+def {u v} eqv_iso {α : Type u} {β : Type v} (i : eqv α β) : iso α β :=
+⟨i.f, (λ y, (i.h y).1.1),
+begin
+  intro,
+  have w := i.h (i.f x),
+  induction w with fib con,
+  induction fib with xx gg,
+  admit
+end
+, sorry⟩
 
 @[simp] lemma prod.mk.eta {α β} : Π {p : α × β}, (p.1, p.2) = p
 | (a, b) := rfl
@@ -109,12 +126,12 @@ begin
   have fib : fiber from_fins y := ⟨to_fins y, from_fins_to_fins y⟩,
   apply psigma.mk fib,
   intro fib2,
-
+  induction fib with f h,
+  induction fib2 with f2 h2,
   induction y with y ys ih,
-  simp [fiber, from_fins] at fib fib2,
+  -- simp [fiber, from_fins] at fib fib2,
 
-  -- induction fib with z1 h1,
-  -- induction fib2 with z2 h2,
+  simp [from_fins] at h h2,
   admit,
   admit
 end
@@ -225,3 +242,13 @@ def s_iso : iso (S G unit) (Σ n k : ℕ, fins n k) :=
 
 def f_iso : iso (F G unit) (Σ n k : ℕ, fins n k) :=
 iso_comp (iso_inv sf_iso) s_iso
+
+def power (x : Type) : ℕ → Type
+| nat.zero := unit
+| (nat.succ n) := x × (power n)
+
+def pseries (s : ℕ → ℕ) (x : Type) := Σ n:ℕ, fin (s n) × power x n
+
+#check @fin.pred
+def ls := @from_fins 3 ⟨2, (λ x, fin.pred (fin.succ (fin.succ x)) sorry)⟩
+#eval ls
