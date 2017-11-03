@@ -57,35 +57,36 @@ def iso_inv {α β} (i : iso α β) : iso β α :=
 def iso_comp {α β γ} (i : iso α β) (j : iso β γ) : iso α γ :=
 ⟨j.f ∘ i.f, i.g ∘ j.g, by simp [j.gf, i.gf], by simp [i.fg, j.fg]⟩
 
-def fiber {α β} (f : α → β) (y : β) := Σ' x, f(x) = y
-
-def iscontr α := Σ' x : α, Π y : α, x = y
-
-structure {u v} eqv (α : Type u) (β : Type v) :=
-(f : α → β) (h : Π y, iscontr (fiber f y))
-
-@[simp] def {u v} iso_fiber {α : Type u} {β : Type v} (i : iso α β) (y : β) : fiber i.f y :=
-⟨i.g y, i.fg y⟩
-
-def {u v} iso_eqv {α : Type u} {β : Type v} (i : iso α β) : eqv α β :=
-⟨i.f, (λ y, ⟨iso_fiber i y, (λ ⟨x, h⟩, by simp [h.symm, i.gf])⟩)⟩
-
-def {u v} eqv_iso {α : Type u} {β : Type v} (i : eqv α β) : iso α β :=
-⟨i.f, (λ y, (i.h y).1.1),
-begin
-  intro,
-  have w := i.h (i.f x),
-  induction w with fib con,
-  induction fib with xx gg,
-  admit
-end
-, sorry⟩
-
 @[simp] lemma prod.mk.eta {α β} : Π {p : α × β}, (p.1, p.2) = p
 | (a, b) := rfl
 
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
+
+@[simp] def fiber {α β} (f : α → β) (y : β) := Σ' x, f(x) = y
+
+@[simp] def iscontr α := Σ' x : α, Π y : α, x = y
+
+structure {u v} eqv (α : Type u) (β : Type v) :=
+(f : α → β) (h : Π y, iscontr (fiber f y))
+
+def {u v} iso_eqv {α : Type u} {β : Type v} (i : iso α β) : eqv α β :=
+⟨i.f, (λ y, ⟨⟨i.g y, i.fg y⟩, (λ ⟨x, h⟩, by simp [h.symm, i.gf])⟩)⟩
+
+def {u v} eqv_iso {α : Type u} {β : Type v} (i : eqv α β) : iso α β :=
+⟨i.f, (λ y, (i.h y).1.1),
+begin
+  intro,
+  let y := i.f x,
+  have b := (i.h y).1,
+  have w := i.h (i.f x),
+  induction w with fib con,
+  have zz := con b,
+  induction fib with xx gg,
+  simp * at *,
+  admit
+end
+, sorry⟩
 
 @[reducible] def fins (n k : ℕ) := fin k → fin n
 
