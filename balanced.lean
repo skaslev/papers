@@ -57,6 +57,13 @@ def iso_inv {α β} (i : iso α β) : iso β α :=
 def iso_comp {α β γ} (i : iso α β) (j : iso β γ) : iso α γ :=
 ⟨j.f ∘ i.f, i.g ∘ j.g, by simp [j.gf, i.gf], by simp [i.fg, j.fg]⟩
 
+def fiber {α β} (f : α → β) (y : β) := Σ' x, f(x) = y
+
+def iscontr α := Σ' x : α, Π y : α, x = y
+
+structure {u v} eqv (α : Type u) (β : Type v) :=
+(f : α → β) (fcontr : Π y, iscontr (fiber f y))
+
 @[simp] lemma prod.mk.eta {α β} : Π {p : α × β}, (p.1, p.2) = p
 | (a, b) := rfl
 
@@ -64,6 +71,62 @@ def iso_comp {α β γ} (i : iso α β) (j : iso β γ) : iso α γ :=
 | ⟨a, b⟩ := rfl
 
 @[reducible] def fins (n k : ℕ) := fin k → fin n
+
+def from_fins {n : ℕ} (x : Σ k : ℕ, fins n k) : list (fin n) :=
+begin
+  induction x with k f,
+  induction k with k ih,
+  { exact [] },
+  { exact f 0 :: ih (f ∘ fin.succ) }
+end
+
+def to_fins {n : ℕ} (x : list (fin n)) : Σ k : ℕ, fins n k :=
+begin
+  induction x with x xs ih,
+  { exact ⟨nat.zero, fin.elim0⟩ },
+  { exact ⟨ih.1.succ, λ k,
+    begin
+      induction k with k k_lt,
+      induction k with k ih2,
+      { exact x },
+      { exact ih2 (nat.lt_of_succ_lt k_lt) }
+    end⟩ }
+end
+
+def from_fins_to_fins {n : ℕ} (x : list (fin n)) : from_fins (to_fins x) = x :=
+begin
+  simp [from_fins, to_fins],
+  induction x with x xs ih,
+  { refl },
+  simp,
+  -- rw ih,
+  admit
+end
+
+def from_fins_fcontr {n : ℕ} : Π y, iscontr (fiber (@from_fins n) y) :=
+begin
+  intro y,
+  have fib : fiber from_fins y := ⟨to_fins y, from_fins_to_fins y⟩,
+  apply psigma.mk fib,
+  intro fib2,
+
+  induction y with y ys ih,
+  simp [fiber, from_fins] at fib fib2,
+
+  -- induction fib with z1 h1,
+  -- induction fib2 with z2 h2,
+  admit,
+  admit
+end
+
+def fins_eqv (n : ℕ) : eqv (Σ k : ℕ, fins n k) (list (fin n))  :=
+⟨from_fins, from_fins_fcontr⟩
+
+def to_fins_from_fins {n : ℕ} (x : Σ k : ℕ, fins n k) : to_fins (from_fins x) = x :=
+sorry
+
+def fins_iso (n : ℕ) : iso (Σ k : ℕ, fins n k) (list (fin n)) :=
+⟨from_fins, to_fins, to_fins_from_fins, from_fins_to_fins⟩
 
 -- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
 -- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins n k
