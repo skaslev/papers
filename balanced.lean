@@ -12,6 +12,10 @@ def iter {α} (g : α → α) : ℕ → α → α
 | nat.zero := id
 | (nat.succ n) := iter n ∘ g
 
+def iter2 {β : Type → Type} (g : Π {α}, α → β α) : Π (n : ℕ) {α}, α → iter β n α
+| nat.zero α := id
+| (nat.succ n) α := iter2 n ∘ g
+
 def diter {β : Type → Type 1} {γ : Type → Type} (g : Π {α}, β (γ α) → β α) : Π (n : ℕ) {α}, β (iter γ n α) → β α
 | nat.zero α := id
 | (nat.succ n) α := g ∘ diter n
@@ -49,9 +53,6 @@ structure {u v} iso (α : Type u) (β : Type v) :=
 (f : α → β) (g : β → α) (gf : Π x, g (f x) = x) (fg : Π x, f (g x) = x)
 
 namespace iso
-def id {α} : iso α α :=
-⟨id, id, by simp, by simp⟩
-
 def inv {α β} (i : iso α β) : iso β α :=
 ⟨i.g, i.f, i.fg, i.gf⟩
 
@@ -161,7 +162,11 @@ def fins_iso {n : ℕ} : iso (Σ k : ℕ, fins n k) (list (fin n)) :=
 -- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins n k
 
 def encode {n : ℕ} (x : list (fin n)) : iter G n unit :=
-sorry
+begin
+  induction x with x xs ih,
+  { exact iter2 @G.G₀ n unit.star },
+  { admit }
+end
 
 def decode {n : ℕ} (x : iter G n unit) : list (fin n) :=
 sorry
