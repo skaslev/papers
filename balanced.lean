@@ -12,7 +12,7 @@ def iter {α} (g : α → α) : ℕ → α → α
 | nat.zero := id
 | (nat.succ n) := iter n ∘ g
 
-def iter2 {β : Type → Type} (g : Π {α}, α → β α) : Π (n : ℕ) {α}, α → iter β n α
+def iter2 {γ : Type → Type} (g : Π {α}, α → γ α) : Π (n : ℕ) {α}, α → iter γ n α
 | nat.zero α := id
 | (nat.succ n) α := iter2 n ∘ g
 
