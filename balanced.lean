@@ -71,10 +71,10 @@ structure {u v} eqv (α : Type u) (β : Type v) :=
 (f : α → β) (h : Π y, iscontr (fiber f y))
 
 def {u v} iso_eqv {α : Type u} {β : Type v} (i : iso α β) : eqv α β :=
-⟨i.f, (λ y, ⟨⟨i.g y, i.fg y⟩, (λ ⟨x, h⟩, by simp [h.symm, i.gf])⟩)⟩
+⟨i.f, λ y, ⟨⟨i.g y, i.fg y⟩, λ ⟨x, h⟩, by simp [h.symm, i.gf]⟩⟩
 
 def {u v} eqv_iso {α : Type u} {β : Type v} (i : eqv α β) : iso α β :=
-⟨i.f, (λ y, (i.h y).1.1),
+⟨i.f, λ y, (i.h y).1.1,
 begin
   intro,
   let y := i.f x,
