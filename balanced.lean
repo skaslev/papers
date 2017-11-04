@@ -143,103 +143,36 @@ def fins_eqv (n : ℕ) : eqv (Σ k : ℕ, fins n k) (list (fin n))  :=
 def to_fins_from_fins {n : ℕ} (x : Σ k : ℕ, fins n k) : to_fins (from_fins x) = x :=
 sorry
 
-def fins_iso (n : ℕ) : iso (Σ k : ℕ, fins n k) (list (fin n)) :=
+def fins_iso {n : ℕ} : iso (Σ k : ℕ, fins n k) (list (fin n)) :=
 ⟨from_fins, to_fins, to_fins_from_fins, from_fins_to_fins⟩
 
 -- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
 -- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins n k
 -- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins n k
 
-def countG₁ {α} : G α → ℕ
-| (G.G₀ x) := nat.zero
-| (G.G₁ x xs) := nat.succ (countG₁ xs)
-
-def append {α} : G α → G α → G α
-| (G.G₀ x) ys := G.G₁ x ys
-| (G.G₁ x xs) ys := G.G₁ x (append xs ys)
-
-def join {α} : G (G α) → G α
-| (G.G₀ x) := x
-| (G.G₁ x xs) := append x (join xs)
-
-def leafs {n α} (x : iter G n α) : G α :=
-begin
-  induction n with n ih generalizing α,
-  { exact G.G₀ x },
-  { exact join (ih x) }
-end
-
-@[reducible] def Gnk (n k : ℕ) α := Σ' x : iter G n α, countG₁ (leafs x) = k
-
-@[reducible] def mkGnk {n : ℕ} {α} (x : iter G n α) : Σ k : ℕ, Gnk n k α :=
-⟨countG₁ (leafs x), x, rfl⟩
-
-@[reducible] def Gn0 (n : ℕ) (α : Type) : Gnk n 0 α :=
+def encode {n : ℕ} (x : list (fin n)) : iter G n unit :=
 sorry
 
-def fins₀ n : ℕ : fins n 0 :=
+def decode {n : ℕ} (x : iter G n unit) : list (fin n) :=
 sorry
-
-def push (n k : ℕ) : fin n × Gnk n k unit → Gnk n k.succ unit :=
-sorry
-
-def pull (n k : ℕ) : Gnk n k.succ unit → fin n × Gnk n k unit :=
-sorry
-
-@[simp]
-def {u} fold (α : ℕ → Type u) : Π n : ℕ, (Π k : ℕ, k < n → α k → α k.succ) → α nat.zero → α n
-| nat.zero := λ f a, a
-| (nat.succ n) := λ f a, f n (nat.lt.base n) (fold n
-  (λ l h g, f l (lt_trans h (nat.lt.base n)) g) a)
-
-def encode' {n k : ℕ} (x : fins n k) : Gnk n k unit :=
-fold
-  (λ l, Gnk n l unit) k
-  (λ l h g, push n l ⟨x ⟨l, h⟩, g⟩)
-  (Gn0 n unit)
-
-def decode' {n k : ℕ} (x : Gnk n k unit) : fins n k :=
-fold
-  (λ l, fins n l) k
-  (λ l h g,
-  begin
-    have y := pull n l,
-    have z := g ⟨l, h⟩,
-    induction x with x h,
-    admit
-  end)
-  (fins₀ n)
-
-def encode_decode' {n k : ℕ} (x : Gnk n k unit) : encode' (decode' x) = x :=
-sorry
-
-def decode_encode' {n k : ℕ} (x : fins n k) : decode' (encode' x) = x :=
-sorry
-
-def encode {n : ℕ} (x : Σ k : ℕ, fins n k) : iter G n unit :=
-(encode' x.2).1
-
-def decode {n : ℕ} (x : iter G n unit) : Σ k : ℕ, fins n k :=
-let y := mkGnk x in ⟨y.1, decode' y.2⟩
 
 def encode_decode {n : ℕ} (x : iter G n unit) : encode (decode x) = x :=
-by simp [encode, decode, encode_decode']
+sorry
 
-def decode_encode {n : ℕ} (x : Σ k : ℕ, fins n k) : decode (encode x) = x :=
-begin
-  induction x with k x,
-  dsimp [encode, decode],
-  admit
-end
+def decode_encode {n : ℕ} (x : list (fin n)) : decode (encode x) = x :=
+sorry
 
-def gn_iso (n : ℕ) : iso (iter G n unit) (Σ k : ℕ, fins n k) :=
+def gl_iso {n : ℕ} : iso (iter G n unit) (list (fin n)) :=
 ⟨decode, encode, encode_decode, decode_encode⟩
 
+def gn_iso {n : ℕ} : iso (iter G n unit) (Σ k : ℕ, fins n k) :=
+iso_comp gl_iso (iso_inv fins_iso)
+
 def s_iso : iso (S G unit) (Σ n k : ℕ, fins n k) :=
-⟨ λ s, ⟨s.1, (gn_iso s.1).f s.2⟩,
-  λ s, ⟨s.1, (gn_iso s.1).g s.2⟩,
-  by intros s; simp [(gn_iso s.1).gf],
-  by intros s; simp [(gn_iso s.1).fg] ⟩
+⟨ λ s, ⟨s.1, gn_iso.f s.2⟩,
+  λ s, ⟨s.1, gn_iso.g s.2⟩,
+  by simp [gn_iso.gf],
+  by simp [gn_iso.fg] ⟩
 
 def f_iso : iso (F G unit) (Σ n k : ℕ, fins n k) :=
 iso_comp (iso_inv sf_iso) s_iso
