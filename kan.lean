@@ -75,8 +75,11 @@ structure {u v} iso (α : Type u) (β : Type v) :=
 (f : α → β) (g : β → α) (gf : Π x, g (f x) = x) (fg : Π x, f (g x) = x)
 
 namespace iso
-def inv {α β} : iso α β → iso β α
-| ⟨f, g, gf, fg⟩ := ⟨g, f, fg, gf⟩
+def inv {α β} (i : iso α β) : iso β α :=
+⟨i.g, i.f, i.fg, i.gf⟩
+
+def comp {α β γ} (i : iso α β) (j : iso β γ) : iso α γ :=
+⟨j.f ∘ i.f, i.g ∘ j.g, by simp [j.gf, i.gf], by simp [i.fg, j.fg]⟩
 
 universes u v w
 variables {f : Type u → Type v} {g : Type u → Type w} (i : Π {α}, iso (f α) (g α))
