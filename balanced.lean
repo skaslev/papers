@@ -169,10 +169,7 @@ def gn_iso {n : ℕ} : iso (iter G n unit) (Σ k : ℕ, fins n k) :=
 iso_comp gl_iso (iso_inv fins_iso)
 
 def s_iso : iso (S G unit) (Σ n k : ℕ, fins n k) :=
-⟨ λ s, ⟨s.1, gn_iso.f s.2⟩,
-  λ s, ⟨s.1, gn_iso.g s.2⟩,
-  by simp [gn_iso.gf],
-  by simp [gn_iso.fg] ⟩
+⟨λ s, ⟨s.1, gn_iso.f s.2⟩, λ s, ⟨s.1, gn_iso.g s.2⟩, by simp [gn_iso.gf], by simp [gn_iso.fg]⟩
 
 def f_iso : iso (F G unit) (Σ n k : ℕ, fins n k) :=
 iso_comp (iso_inv sf_iso) s_iso
@@ -180,6 +177,6 @@ iso_comp (iso_inv sf_iso) s_iso
 def power (x : Type) : ℕ → Type
 | 0 := unit
 | 1 := x
-| (n+2) := x × (power (n+1))
+| (n+2) := x × power (n+1)
 
-def pseries (s : ℕ → ℕ) (x : Type) := Σ n:ℕ, fin (s n) × power x n
+def pseries (s : ℕ → ℕ) (x : Type) := Σ n : ℕ, fin (s n) × power x n
