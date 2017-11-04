@@ -48,14 +48,19 @@ end
 structure {u v} iso (α : Type u) (β : Type v) :=
 (f : α → β) (g : β → α) (gf : Π x, g (f x) = x) (fg : Π x, f (g x) = x)
 
-def sf_iso {g α} : iso (S g α) (F g α) :=
-⟨from_s, to_s, to_s_from_s, from_s_to_s⟩
+namespace iso
+def id {α} : iso α α :=
+⟨id, id, by simp, by simp⟩
 
-def iso_inv {α β} (i : iso α β) : iso β α :=
+def inv {α β} (i : iso α β) : iso β α :=
 ⟨i.g, i.f, i.fg, i.gf⟩
 
-def iso_comp {α β γ} (i : iso α β) (j : iso β γ) : iso α γ :=
+def comp {α β γ} (i : iso α β) (j : iso β γ) : iso α γ :=
 ⟨j.f ∘ i.f, i.g ∘ j.g, by simp [j.gf, i.gf], by simp [i.fg, j.fg]⟩
+end iso
+
+def sf_iso {g α} : iso (S g α) (F g α) :=
+⟨from_s, to_s, to_s_from_s, from_s_to_s⟩
 
 @[simp] lemma prod.mk.eta {α β} : Π {p : α × β}, (p.1, p.2) = p
 | (a, b) := rfl
@@ -171,13 +176,13 @@ def gl_iso {n : ℕ} : iso (iter G n unit) (list (fin n)) :=
 ⟨decode, encode, encode_decode, decode_encode⟩
 
 def gn_iso {n : ℕ} : iso (iter G n unit) (Σ k : ℕ, fins n k) :=
-iso_comp gl_iso (iso_inv fins_iso)
+gl_iso.comp fins_iso.inv
 
 def s_iso : iso (S G unit) (Σ n k : ℕ, fins n k) :=
 ⟨λ s, ⟨s.1, gn_iso.f s.2⟩, λ s, ⟨s.1, gn_iso.g s.2⟩, by simp [gn_iso.gf], by simp [gn_iso.fg]⟩
 
 def f_iso : iso (F G unit) (Σ n k : ℕ, fins n k) :=
-iso_comp (iso_inv sf_iso) s_iso
+sf_iso.inv.comp s_iso
 
 def power (x : Type) : ℕ → Type
 | 0 := unit
