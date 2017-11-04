@@ -172,15 +172,13 @@ def yoneda_iso f [functor f] ⦃α⦄ : iso (f α) (yoneda f α) :=
 def coyoneda_iso f [functor f] ⦃α⦄ : iso (f α) (coyoneda f α) :=
 ⟨cocheck, councheck, councheck_cocheck, cocheck_councheck⟩
 
+def yoco_iso f [functor f] ⦃α⦄ : iso (yoneda f α) (coyoneda f α) :=
+(@yoneda_iso f _ α).inv.comp (@coyoneda_iso f _ α)
+
 instance {f} [applicative f] : applicative (yoneda f)   := iso.applicative (yoneda_iso f)
 instance {f} [applicative f] : applicative (coyoneda f) := iso.applicative (coyoneda_iso f)
 instance {f} [monad f]       : monad (yoneda f)         := iso.monad (yoneda_iso f)
 instance {f} [monad f]       : monad (coyoneda f)       := iso.monad (coyoneda_iso f)
-
-def yoco_iso f [functor f] ⦃α⦄ : iso (yoneda f α) (coyoneda f α) :=
-⟨cocheck ∘ uncheck, check ∘ councheck,
-by simp [councheck_cocheck, check_uncheck],
-by simp [uncheck_check, cocheck_councheck]⟩
 
 def natural_check {f} [functor f] : natural (@check f _) :=
 begin

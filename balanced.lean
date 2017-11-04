@@ -82,7 +82,12 @@ begin
   have w := i.h (i.f x),
   induction w with fib con,
   have zz := con b,
+  let ww : fiber i.f y := ⟨x, rfl⟩,
+  let cc : ww.1 = x := rfl,
   induction fib with xx gg,
+  type_check b.2,
+  type_check (i.h y),
+  -- simp [cc.symm],
   simp * at *,
   admit
 end
