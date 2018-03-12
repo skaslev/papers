@@ -4,7 +4,7 @@ inductive F (g : Type → Type) : Type → Type 1
 | F₁ : Π {α}, F (g α) → F α
 
 -- g(x) = x + x g(x) ↔ g(x) = x/(1-x) ↔ gⁿ(x) = x/(1-nx)
-inductive G α : Type
+inductive G (α : Type) : Type
 | G₀ : α → G
 | G₁ : α → G → G
 
@@ -21,7 +21,7 @@ def diter {β : Type → Type 1} {γ : Type → Type} (g : Π {α}, β (γ α) �
 | (nat.succ n) α := g ∘ diter n
 
 -- s(x) = Σ n:ℕ, gⁿ(x)
-def S g α := Σ n : ℕ, iter g n α
+def S (g : Type → Type) (α : Type) := Σ n : ℕ, iter g n α
 
 -- f(x) = s(x)
 def from_s {g α} (x : S g α) : F g α :=
@@ -63,15 +63,15 @@ end iso
 def sf_iso {g α} : iso (S g α) (F g α) :=
 ⟨from_s, to_s, to_s_from_s, from_s_to_s⟩
 
-@[simp] lemma prod.mk.eta {α β} : Π {p : α × β}, (p.1, p.2) = p
-| (a, b) := rfl
+-- @[simp] lemma prod.mk.eta {α β} : Π {p : α × β}, (p.1, p.2) = p
+-- | (a, b) := rfl
 
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
 
 @[simp] def fiber {α β} (f : α → β) (y : β) := Σ' x, f(x) = y
 
-@[simp] def iscontr α := Σ' x : α, Π y : α, x = y
+@[simp] def {u} iscontr (α : Type u) := Σ' x : α, Π y : α, x = y
 
 structure {u v} eqv (α : Type u) (β : Type v) :=
 (f : α → β) (h : Π y, iscontr (fiber f y))

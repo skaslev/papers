@@ -10,8 +10,8 @@ def mapl {g h} {α β} (s : α → β) (x : lan g h α) : lan g h β :=
 attribute [reducible] id
 attribute [simp] function.comp
 
-@[simp] lemma prod.mk.eta {α β} : Π {p : α × β}, (p.1, p.2) = p
-| (a, b) := rfl
+-- @[simp] lemma prod.mk.eta {α β} : Π {p : α × β}, (p.1, p.2) = p
+-- | (a, b) := rfl
 
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
@@ -166,13 +166,13 @@ instance monad [monad f] : monad g :=
   end }
 end iso
 
-def yoneda_iso f [functor f] ⦃α⦄ : iso (f α) (yoneda f α) :=
+def yoneda_iso (f : Type → Type) [functor f] ⦃α⦄ : iso (f α) (yoneda f α) :=
 ⟨check, uncheck, uncheck_check, check_uncheck⟩
 
-def coyoneda_iso f [functor f] ⦃α⦄ : iso (f α) (coyoneda f α) :=
+def coyoneda_iso (f : Type → Type) [functor f] ⦃α⦄ : iso (f α) (coyoneda f α) :=
 ⟨cocheck, councheck, councheck_cocheck, cocheck_councheck⟩
 
-def yoco_iso f [functor f] ⦃α⦄ : iso (yoneda f α) (coyoneda f α) :=
+def yoco_iso (f : Type → Type) [functor f] ⦃α⦄ : iso (yoneda f α) (coyoneda f α) :=
 (@yoneda_iso f _ α).inv.comp (@coyoneda_iso f _ α)
 
 instance {f} [applicative f] : applicative (yoneda f)   := iso.applicative (yoneda_iso f)
