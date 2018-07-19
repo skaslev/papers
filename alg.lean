@@ -23,7 +23,7 @@ def J (i : I) := F₁
 def K (α : Type) : Π i : I, J i → Type
 | F₂.e₀ F₁.e₀ := F₁
 | F₂.e₁ F₁.e₀ := α
-def Maybe α := algebraic I J (K α)
+def Maybe (α) := algebraic I J (K α)
 def Nothing {α} : Maybe α := ⟨F₂.e₀, begin intro, cases j, exact F₁.e₀ end⟩
 def Just {α} (a : α) : Maybe α := ⟨F₂.e₁, begin intro, cases j, exact a end⟩
 end Maybe
@@ -62,6 +62,6 @@ def K (α β) : Π i : I, J i → Type
 | F₂.e₀ F₁.e₀ := F₁
 | F₂.e₁ F₂.e₀ := α
 | F₂.e₁ F₂.e₁ := β
-def List α := fix $ λ β, algebraic I J (K α β)
+def List (α) := fix $ λ β, algebraic I J (K α β)
 -- TODO: Define Nil and Cons
 end List
