@@ -17,59 +17,69 @@ attribute [simp] function.comp
 | ⟨a, b⟩ := rfl
 
 instance {g h} : functor (ran g h) :=
-{ map := @mapr g h,
-  id_map := by intros; simp [mapr],
-  map_comp := by intros; simp [mapr] }
+{ map := @mapr g h }
+
+instance {g h} : is_lawful_functor (ran g h) :=
+{ id_map := by intros; simp [functor.map, mapr],
+  comp_map := by intros; simp [functor.map, mapr] }
 
 instance {g h} : functor (lan g h) :=
-{ map := @mapl g h,
-  id_map := by intros; simp [mapl],
-  map_comp := by intros; simp [mapl] }
+{ map := @mapl g h }
+
+instance {g h} : is_lawful_functor (lan g h) :=
+{ id_map := by intros; simp [functor.map, mapl],
+  comp_map := by intros; simp [functor.map, mapl] }
 
 def natural {f g} [functor f] [functor g] (t : Π {α}, f α → g α) :=
 Π {α β} {x : f α} (s : α → β), s <$> (t x) = t (s <$> x)
 
 axiom free_theorem {f g} [functor f] [functor g] (t : Π α, f α → g α) : natural t
 
+section yoneda
+
+variables {f : Type → Type} [functor f] [is_lawful_functor f]
+
 @[reducible] def yoneda := ran id
 
-def check {f} [functor f] {α} (x : f α) : yoneda f α :=
+def check {α} (x : f α) : yoneda f α :=
 λ b s, s <$> x
 
-def uncheck {f} [functor f] {α} (x : yoneda f α) : f α :=
+def uncheck {α} (x : yoneda f α) : f α :=
 x α id
 
-def uncheck_check {f} [functor f] {α} (x : f α) : uncheck (check x) = x :=
+def uncheck_check {α} (x : f α) : uncheck (check x) = x :=
 begin
-  simp [check, uncheck, functor.id_map]
+  simp [check, uncheck, is_lawful_functor.id_map]
 end
 
-def check_uncheck {f} [functor f] {α} (x : yoneda f α) : check (uncheck x) = x :=
+def check_uncheck {α} (x : yoneda f α) : check (uncheck x) = x :=
 begin
-  simp [check],
-  repeat { apply funext, intro },
-  apply free_theorem (@uncheck f _)
+  simp [check, uncheck],
+  funext,
+  apply free_theorem (@uncheck f _ _)
 end
 
 @[reducible] def coyoneda := lan id
 
-def cocheck {f} [functor f] {α} (x : f α) : coyoneda f α :=
+def cocheck {α} (x : f α) : coyoneda f α :=
 ⟨α, ⟨id, x⟩⟩
 
-def councheck {f} [functor f] {α} (x : coyoneda f α) : f α :=
+def councheck {α} (x : coyoneda f α) : f α :=
 x.2.1 <$> x.2.2
 
-def councheck_cocheck {f} [functor f] {α} (x : f α) : councheck (cocheck x) = x :=
+def councheck_cocheck {α} (x : f α) : councheck (cocheck x) = x :=
 begin
-  simp [cocheck, councheck, functor.id_map]
+  simp [cocheck, councheck, is_lawful_functor.id_map]
 end
 
-def cocheck_councheck {f} [functor f] {α} (x : coyoneda f α) : cocheck (councheck x) = x :=
+def cocheck_councheck {α} (x : coyoneda f α) : cocheck (councheck x) = x :=
 begin
   simp [councheck],
-  rw ←free_theorem (@cocheck f _),
-  simp [cocheck, has_map.map, mapl]
+  rw ←free_theorem (@cocheck f _ _),
+  simp [cocheck, functor.map, mapl]
 end
+
+end yoneda
 
 structure {u v} iso (α : Type u) (β : Type v) :=
 (f : α → β) (g : β → α) (gf : Π x, g (f x) = x) (fg : Π x, f (g x) = x)
@@ -98,113 +108,128 @@ i.f $ i.g x >>= i.g ∘ s
 
 @[priority std.priority.default-1]
 instance functor [functor f] : functor g :=
-{ map := @imap f g @i _,
-  id_map :=
-  begin
-    intros,
-    simp [imap, functor.id_map, i.fg]
-  end,
-  map_comp :=
-  begin
-    intros,
-    simp [imap, i.gf],
-    rw functor.map_comp
-  end }
+{ map := @imap f g @i _ }
+
+-- @[priority std.priority.default-1]
+-- instance is_lawful_functor [functor f] : is_lawful_functor g :=
+-- { id_map :=
+--   begin
+--     intros,
+--     simp [imap, is_lawful_functor.id_map, i.fg]
+--   end,
+--   comp_map :=
+--   begin
+--     intros,
+--     simp [imap, i.gf],
+--     rw is_lawful_functor.comp_map
+--   end }
 
 @[priority std.priority.default-1]
 instance applicative [applicative f] : applicative g :=
 { pure := @ipure f g @i _,
-  seq := @iseq f g @i _,
-  pure_seq_eq_map := by intros; simp,
-  id_map :=
-  begin
-    intros,
-    simp [ipure, iseq, i.gf],
-    simp [applicative.pure_seq_eq_map, functor.id_map, i.fg]
-  end,
-  map_pure :=
-  begin
-    intros,
-    simp [ipure, iseq, i.gf],
-    simp [applicative.pure_seq_eq_map, applicative.map_pure]
-  end,
-  seq_pure :=
-  begin
-    intros,
-    simp [ipure, iseq, i.gf],
-    simp [applicative.pure_seq_eq_map, applicative.seq_pure]
-  end,
-  seq_assoc :=
-  begin
-    intros,
-    simp [ipure, iseq, i.gf],
-    simp [applicative.pure_seq_eq_map, applicative.seq_assoc]
-  end }
+  seq := @iseq f g @i _ }
+
+-- @[priority std.priority.default-1]
+-- instance is_lawful_applicative [is_lawful_applicative f] : is_lawful_applicative g := 
+-- { pure_seq_eq_map := by intros; simp,
+--   id_map :=
+--   begin
+--     intros,
+--     simp [ipure, iseq, i.gf],
+--     simp [is_lawful_applicative.pure_seq_eq_map, is_lawful_functor.id_map, i.fg]
+--   end,
+--   map_pure :=
+--   begin
+--     intros,
+--     simp [ipure, iseq, i.gf],
+--     simp [is_lawful_applicative.pure_seq_eq_map, is_lawful_applicative.map_pure]
+--   end,
+--   seq_pure :=
+--   begin
+--     intros,
+--     simp [ipure, iseq, i.gf],
+--     simp [is_lawful_applicative.pure_seq_eq_map, is_lawful_applicative.seq_pure]
+--   end,
+--   seq_assoc :=
+--   begin
+--     intros,
+--     simp [ipure, iseq, i.gf],
+--     simp [is_lawful_applicative.pure_seq_eq_map, is_lawful_applicative.seq_assoc]
+--   end }
 
 @[priority std.priority.default-1]
 instance monad [monad f] : monad g :=
 { pure := @ipure f g @i _,
-  bind := @ibind f g @i _,
-  id_map :=
-  begin
-    intros,
-    simp [ipure, ibind, i.gf],
-    rw monad.bind_pure_comp_eq_map,
-    simp [functor.id_map, i.fg]
-  end,
-  pure_bind :=
-  begin
-    intros,
-    simp [ipure, ibind, i.gf],
-    simp [monad.pure_bind, i.fg]
-  end,
-  bind_assoc :=
-  begin
-    intros,
-    simp [ibind, i.gf],
-    simp [monad.bind_assoc]
-  end }
+  bind := @ibind f g @i _ }
+
+-- @[priority std.priority.default-1]
+-- instance is_lawful_monad [is_lawful_monad f] : is_lawful_monad g :=
+-- { id_map :=
+--   begin
+--     intros,
+--     simp [ipure, ibind, i.gf],
+--     rw monad.bind_pure_comp_eq_map,
+--     simp [is_lawful_functor.id_map, i.fg]
+--   end,
+--   pure_bind :=
+--   begin
+--     intros,
+--     simp [ipure, ibind, i.gf],
+--     simp [is_lawful_monad.pure_bind, i.fg]
+--   end,
+--   bind_assoc :=
+--   begin
+--     intros,
+--     simp [ibind, i.gf],
+--     simp [is_lawful_monad.bind_assoc]
+--   end }
 end iso
 
-def yoneda_iso (f : Type → Type) [functor f] ⦃α⦄ : iso (f α) (yoneda f α) :=
+def yoneda_iso (f : Type → Type) [functor f] [is_lawful_functor f] ⦃α⦄ : iso (f α) (yoneda f α) :=
 ⟨check, uncheck, uncheck_check, check_uncheck⟩
 
-def coyoneda_iso (f : Type → Type) [functor f] ⦃α⦄ : iso (f α) (coyoneda f α) :=
+def coyoneda_iso (f : Type → Type) [functor f] [is_lawful_functor f] ⦃α⦄ : iso (f α) (coyoneda f α) :=
 ⟨cocheck, councheck, councheck_cocheck, cocheck_councheck⟩
 
-def yoco_iso (f : Type → Type) [functor f] ⦃α⦄ : iso (yoneda f α) (coyoneda f α) :=
-(@yoneda_iso f _ α).inv.comp (@coyoneda_iso f _ α)
+def yoco_iso (f : Type → Type) [functor f] [is_lawful_functor f] ⦃α⦄ : iso (yoneda f α) (coyoneda f α) :=
+(@yoneda_iso f _ _ α).inv.comp (@coyoneda_iso f _ _ α)
 
-instance {f} [applicative f] : applicative (yoneda f)   := iso.applicative (yoneda_iso f)
-instance {f} [applicative f] : applicative (coyoneda f) := iso.applicative (coyoneda_iso f)
-instance {f} [monad f]       : monad (yoneda f)         := iso.monad (yoneda_iso f)
-instance {f} [monad f]       : monad (coyoneda f)       := iso.monad (coyoneda_iso f)
+-- instance {f} [applicative f] : applicative (yoneda f)   := iso.applicative (yoneda_iso f)
+-- instance {f} [applicative f] : applicative (coyoneda f) := iso.applicative (coyoneda_iso f)
+-- instance {f} [monad f]       : monad (yoneda f)         := iso.monad (yoneda_iso f)
+-- instance {f} [monad f]       : monad (coyoneda f)       := iso.monad (coyoneda_iso f)
 
-def natural_check {f} [functor f] : natural (@check f _) :=
+section naturality_proofs
+
+variables {f : Type → Type} [functor f] [is_lawful_functor f]
+
+def natural_check : natural (@check f _ _) :=
 begin
   unfold natural, intros,
-  simp [check, has_map.map, mapr],
-  repeat { apply funext, intro },
-  rw functor.map_comp
+  dsimp [check, functor.map, mapr],
+  funext,
+  rw is_lawful_functor.comp_map
 end
 
-def natural_uncheck {f} [functor f] : natural (@uncheck f _) :=
+def natural_uncheck : natural (@uncheck f _ _) :=
 begin
   unfold natural, intros,
-  dsimp [uncheck, has_map.map, mapr],
+  dsimp [uncheck, functor.map, mapr],
   admit  -- ← stuck here
 end
 
-def natural_cocheck {f} [functor f] : natural (@cocheck f _) :=
+def natural_cocheck : natural (@cocheck f _ _) :=
 begin
   unfold natural, intros,
-  dsimp [cocheck, has_map.map, mapl],
+  dsimp [cocheck, functor.map, mapl],
   admit  -- ← stuck here
 end
 
-def natural_councheck {f} [functor f] : natural (@councheck f _) :=
+def natural_councheck : natural (@councheck f _ _) :=
 begin
   unfold natural, intros,
-  simp [councheck, has_map.map, mapl],
-  rw ←functor.map_comp
+  dsimp [councheck, functor.map, mapl],
+  rw ←is_lawful_functor.comp_map
 end
+
+end naturality_proofs
