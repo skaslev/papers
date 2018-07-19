@@ -69,47 +69,27 @@ def sf_iso {g α} : iso (S g α) (F g α) :=
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
 
-@[simp] def fiber {α β} (f : α → β) (y : β) := Σ' x, f(x) = y
+@[reducible] def fins (k n : ℕ) := fin k → fin n
 
-@[simp] def {u} iscontr (α : Type u) := Σ' x : α, Π y : α, x = y
+def fins_0_n {n : ℕ} : fins 0 n := fin.elim0
+def elim_fins_kp1_0 {k : ℕ} (f : fins (k+1) 0) : empty := fin.elim0 (f 0)
 
-structure {u v} eqv (α : Type u) (β : Type v) :=
-(f : α → β) (h : Π y, iscontr (fiber f y))
+def f0 {k n : ℕ} (x : fin n × fins k n) : fins (k+1) n
+| ⟨0, h⟩ := x.1
+| ⟨y+1, h⟩ := x.2 ⟨y, nat.lt_of_succ_lt_succ h⟩
 
-def {u v} iso_eqv {α : Type u} {β : Type v} (i : iso α β) : eqv α β :=
-⟨i.f, λ y, ⟨⟨i.g y, i.fg y⟩, λ ⟨x, h⟩, by simp [h.symm, i.gf]⟩⟩
+def f1 {k n : ℕ} (f : fins (k+1) n) : fin n × fins k n := 
+⟨f 0, f ∘ fin.succ⟩
 
-def {u v} eqv_iso {α : Type u} {β : Type v} (i : eqv α β) : iso α β :=
-⟨i.f, λ y, (i.h y).1.1,
-begin
-  intro,
-  let y := i.f x,
-  have b := (i.h y).1,
-  have w := i.h (i.f x),
-  induction w with fib con,
-  have zz := con b,
-  let ww : fiber i.f y := ⟨x, rfl⟩,
-  let cc : ww.1 = x := rfl,
-  induction fib with xx gg,
-  type_check b.2,
-  type_check (i.h y),
-  -- simp [cc.symm],
-  simp * at *,
-  admit
-end
-, sorry⟩
+def from_fins {n : ℕ} : (Σ k : ℕ, fins k n) → list (fin n)
+| ⟨0, f⟩ := []
+| ⟨l+1, f⟩ := f 0 :: from_fins ⟨l, f ∘ fin.succ⟩
 
-@[reducible] def fins (n k : ℕ) := fin k → fin n
+def to_fins {n : ℕ} : list (fin n) → Σ k : ℕ, fins k n
+| [] := ⟨0, fin.elim0⟩
+| (x::xs) := let ⟨l, f⟩ := to_fins xs in ⟨l+1, f0 ⟨x,f⟩⟩
 
-def from_fins {n : ℕ} (x : Σ k : ℕ, fins n k) : list (fin n) :=
-begin
-  induction x with k f,
-  induction k with k ih,
-  { exact [] },
-  { exact f 0 :: ih (f ∘ fin.succ) }
-end
-
-def to_fins {n : ℕ} (x : list (fin n)) : Σ k : ℕ, fins n k :=
+def to_fins2 {n : ℕ} (x : list (fin n)) : Σ k : ℕ, fins k n :=
 begin
   induction x with x xs ih,
   { exact ⟨nat.zero, fin.elim0⟩ },
@@ -124,42 +104,33 @@ end
 
 def from_fins_to_fins {n : ℕ} (x : list (fin n)) : from_fins (to_fins x) = x :=
 begin
-  simp [from_fins, to_fins],
   induction x with x xs ih,
   { refl },
-  simp,
+  -- simp [],
+  -- simp [from_fins, to_fins],
+  dsimp [to_fins, to_fins._match_1],
+  -- rw ←ih,
+  -- unfold to_fins._match_1,
   -- rw ih,
   admit
 end
 
-def from_fins_fcontr {n : ℕ} : Π y, iscontr (fiber (@from_fins n) y) :=
+def to_fins_from_fins {n : ℕ} (x : Σ k : ℕ, fins k n) : to_fins (from_fins x) = x :=
 begin
-  intro y,
-  have fib : fiber from_fins y := ⟨to_fins y, from_fins_to_fins y⟩,
-  apply psigma.mk fib,
-  intro fib2,
-  induction fib with f h,
-  induction fib2 with f2 h2,
-  induction y with y ys ih,
-  -- simp [fiber, from_fins] at fib fib2,
-
-  simp [from_fins] at h h2,
-  admit,
-  admit
+  induction x with k f,
+  induction k,
+  -- exact fin.elim0,
+  simp [from_fins, to_fins],
+  funext,
+  admit, admit
 end
 
-def fins_eqv (n : ℕ) : eqv (Σ k : ℕ, fins n k) (list (fin n))  :=
-⟨from_fins, from_fins_fcontr⟩
-
-def to_fins_from_fins {n : ℕ} (x : Σ k : ℕ, fins n k) : to_fins (from_fins x) = x :=
-sorry
-
-def fins_iso {n : ℕ} : iso (Σ k : ℕ, fins n k) (list (fin n)) :=
+def fins_iso {n : ℕ} : iso (Σ k : ℕ, fins k n) (list (fin n)) :=
 ⟨from_fins, to_fins, to_fins_from_fins, from_fins_to_fins⟩
 
 -- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
--- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins n k
--- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins n k
+-- thrm gn_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fins k n
+-- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fins k n
 
 def encode {n : ℕ} (x : list (fin n)) : iter G n unit :=
 begin
@@ -180,13 +151,13 @@ sorry
 def gl_iso {n : ℕ} : iso (iter G n unit) (list (fin n)) :=
 ⟨decode, encode, encode_decode, decode_encode⟩
 
-def gn_iso {n : ℕ} : iso (iter G n unit) (Σ k : ℕ, fins n k) :=
+def gn_iso {n : ℕ} : iso (iter G n unit) (Σ k : ℕ, fins k n) :=
 gl_iso.comp fins_iso.inv
 
-def s_iso : iso (S G unit) (Σ n k : ℕ, fins n k) :=
+def s_iso : iso (S G unit) (Σ n k : ℕ, fins k n) :=
 ⟨λ s, ⟨s.1, gn_iso.f s.2⟩, λ s, ⟨s.1, gn_iso.g s.2⟩, by simp [gn_iso.gf], by simp [gn_iso.fg]⟩
 
-def f_iso : iso (F G unit) (Σ n k : ℕ, fins n k) :=
+def f_iso : iso (F G unit) (Σ n k : ℕ, fins k n) :=
 sf_iso.inv.comp s_iso
 
 def power (x : Type) : ℕ → Type
