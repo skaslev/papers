@@ -1,6 +1,6 @@
 notation f `⋆` g := g ∘ f
 
--- fseq n x = x^n
+-- fseq n x = xⁿ
 def fseq (n : ℕ) (α : Type) := fin n → α
 
 def fperm (n) := Σ' p : fin n → fin n, function.bijective p
@@ -8,14 +8,14 @@ def fperm (n) := Σ' p : fin n → fin n, function.bijective p
 def fordered (n α) (a b : fseq n α) := a = b
 def funordered (n α) (a b : fseq n α) := ∃ p : fperm n, (p.1 ⋆ a) = b
 
--- fset n x = x^n / n!
+-- fset n x = xⁿ / n!
 def fset (n α) := quot (funordered n α)
 
--- ogf c x = Σ n:ℕ, (c n) x^n
+-- ogf c x = Σ n:ℕ, cₙ xⁿ
 def ogf (c : ℕ → ℕ) (α) :=
 Σ n : ℕ, fin (c n) × fseq n α
 
--- egf c x = Σ n:ℕ, (c n) x^n / n!
+-- egf c x = Σ n:ℕ, cₙ xⁿ / n!
 def egf (c : ℕ → ℕ) (α) :=
 Σ n : ℕ, fin (c n) × fset n α
 
@@ -28,6 +28,15 @@ def rel (α) := α → α → Prop
 -- af r s x = Σ i:I, x^s(i) / r(s(i))
 def af (r : Π n α, rel (fseq n α)) (I) (s : I → ℕ) (α) :=
 Σ i : I, quot (r (s i) α)
+
+def shape (c : ℕ → ℕ) := Σ n, fin (c n)
+def size {c} (x : shape c) := x.1
+
+def lift_ogf {c α} (x : ogf c α) : af fordered (shape c) size α :=
+⟨⟨x.1, x.2.1⟩, quot.mk _ x.2.2⟩
+
+def lift_egf {c α} (x : egf c α) : af funordered (shape c) size α :=
+⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
 inductive ℕω
 | fin : ℕ → ℕω
@@ -48,15 +57,6 @@ def ext_rel (r : Π n α, rel (fseq n α)) (q : Π α, rel (iseq α)) : Π n α,
 
 def lift_af {r I s α} (q : Π α, rel (iseq α)) (x : af r I s α) : afω (ext_rel r q) I (s ⋆ ℕω.fin) α :=
 x
-
-def shape (c : ℕ → ℕ) := Σ n, fin (c n)
-def size {c} (x : shape c) := x.1
-
-def lift_ogf {c α} (x : ogf c α) : af fordered (shape c) size α :=
-⟨⟨x.1, x.2.1⟩, quot.mk _ x.2.2⟩
-
-def lift_egf {c α} (x : egf c α) : af funordered (shape c) size α :=
-⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
@@ -356,6 +356,6 @@ def kem (α) := Σ β, iso α β
 def icyc := Σ' p : ℕ → ℕ, ∀ i, p i = p 0 + i
 def icyclic (α) (a b : iseq α) := ∃ p : icyc, (p.1 ⋆ a) = b
 def isec (α) := quot (icyclic α)
--- igf x = Σ n : ℕ, (c n) x^ℕ / ℕ
+-- igf x = Σ n : ℕ, cₙ x^ℕ / ℕ
 def igf (c : ℕ → ℕ) (α) :=
 Σ n : ℕ, fin (c n) × isec α
