@@ -1,15 +1,31 @@
-notation f `⋆` g := g ∘ f
+def ℕ₁ := Σ' n:ℕ, n > 0
+
+def iter {α} (g : α → α) : ℕ → α → α
+| 0 := id
+| (n+1) := iter n ∘ g
+
+def perm (n) := Σ' p : fin n → fin n, function.bijective p
+def part (k n) := Σ' p : fin n → fin k, function.surjective p
+def inorb {n} (p : perm n) (a b : fin n) := ∃ s, iter p.1 s a = b
+def factor {n} (p : perm n) : Σ' k (q : part k n), ∀ a b, q.1 a = q.1 b ↔ inorb p a b := sorry
+def kcycles (k n) := Σ' p : perm n, (factor p).1 = k
 
 -- fseq n x = xⁿ
 def fseq (n : ℕ) (α : Type) := fin n → α
 
-def fperm (n) := Σ' p : fin n → fin n, function.bijective p
-
-def fordered (n α) (a b : fseq n α) := a = b
-def funordered (n α) (a b : fseq n α) := ∃ p : fperm n, (p.1 ⋆ a) = b
+def ordered (n α) (a b : fseq n α) := a = b
+def unordered (n α) (a b : fseq n α) := ∃ p : perm n, (a ∘ p.1) = b
+def kcyclic (k n : ℕ₁) (α) (a b : fseq n.1 α) := ∃ p : kcycles k.1 n.1, (a ∘ p.1.1) = b
+def cyclic := kcyclic ⟨1, nat.zero_lt_succ 0⟩
 
 -- fset n x = xⁿ / n!
-def fset (n α) := quot (funordered n α)
+def fset (n α) := quot (unordered n α)
+
+-- fsec n x = xⁿ / n
+def fsec (n α) := quot (cyclic n α)
+
+-- fsed k n x = xⁿ / nᵏ
+def fsed (k n α) := quot (kcyclic k n α)
 
 -- ogf c x = Σ n:ℕ, cₙ xⁿ
 def ogf (c : ℕ → ℕ) (α) :=
@@ -18,6 +34,17 @@ def ogf (c : ℕ → ℕ) (α) :=
 -- egf c x = Σ n:ℕ, cₙ xⁿ / n!
 def egf (c : ℕ → ℕ) (α) :=
 Σ n : ℕ, fin (c n) × fset n α
+
+-- cgf c x = Σ n:ℕ₁, cₙ xⁿ / n
+def cgf (c : ℕ₁ → ℕ) (α) :=
+Σ n : ℕ₁, fin (c n) × fsec n α
+
+-- dgf c k x = Σ n:ℕ₁, cₙ xⁿ / nᵏ
+def dgf (c : ℕ₁ → ℕ) (k α) :=
+Σ n : ℕ₁, fin (c n) × fsed k n α
+
+-- ζ k x = Σ n:ℕ₁, xⁿ / nᵏ
+def ζ (k) := dgf (λ _, 1) k
 
 def rel (α) := α → α → Prop
 
@@ -32,10 +59,12 @@ def af (r : Π n α, rel (fseq n α)) (I) (s : I → ℕ) (α) :=
 def shape (c : ℕ → ℕ) := Σ n, fin (c n)
 def size {c} (x : shape c) := x.1
 
-def lift_ogf {c α} (x : ogf c α) : af fordered (shape c) size α :=
+-- ogf c ↪ af ordered (shape c) size
+def lift_ogf {c α} (x : ogf c α) : af ordered (shape c) size α :=
 ⟨⟨x.1, x.2.1⟩, quot.mk _ x.2.2⟩
 
-def lift_egf {c α} (x : egf c α) : af funordered (shape c) size α :=
+-- egf c ↪ af unordered (shape c) size
+def lift_egf {c α} (x : egf c α) : af unordered (shape c) size α :=
 ⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
 inductive ℕω
@@ -51,12 +80,43 @@ def seqω : ℕω → Type → Type
 def afω (r : Π n α, rel (seqω n α)) (I) (s : I → ℕω) (α) :=
 Σ i : I, quot (r (s i) α)
 
-def ext_rel (r : Π n α, rel (fseq n α)) (q : Π α, rel (iseq α)) : Π n α, rel (seqω n α)
+def ext_relω (r : Π n α, rel (fseq n α)) (q : Π α, rel (iseq α)) : Π n α, rel (seqω n α)
 | (ℕω.fin n) := r n
 | ℕω.inf := q
 
-def lift_af {r I s α} (q : Π α, rel (iseq α)) (x : af r I s α) : afω (ext_rel r q) I (s ⋆ ℕω.fin) α :=
+-- af r I s ↪ afω (ext_relω r q) I (ℕω.fin ∘ s)
+def lift_af {r I s α} (q : Π α, rel (iseq α)) (x : af r I s α) : afω (ext_relω r q) I (ℕω.fin ∘ s) α :=
 x
+
+def af₁ (r : Π (n:ℕ₁) α, rel (fseq n.1 α)) (I) (s : I → ℕ₁) (α) :=
+Σ i : I, quot (r (s i) α)
+
+def ext_rel₁ (r : Π (n:ℕ₁) α, rel (fseq n.1 α)) : Π (n:ℕ) α, rel (fseq n α)
+| 0 := λ α a b, true  -- `fseq 0 α` is a singleton type
+| (n+1) := r ⟨n+1, nat.pos_of_ne_zero (nat.succ_ne_zero n)⟩
+
+def ext_s₁ {I} (s : I → ℕ₁) (i : I) : ℕ := (s i).1
+
+-- af₁ r I s ↪ af (ext_rel₁ r) I (ext_s₁ s)
+def lift_af₁ {r I s α} (x : af₁ r I s α) : af (ext_rel₁ r) I (ext_s₁ s) α :=
+⟨x.1, eq.mp begin
+  dsimp [ext_s₁],
+  induction (s x.1) with n nh,
+  induction n,
+  { exact false.elim (nat.lt_irrefl 0 nh) },
+  { simp [ext_rel₁] }
+end x.2⟩
+
+def shape₁ (c : ℕ₁ → ℕ) := Σ n, fin (c n)
+def size₁ {c} (x : shape₁ c) := x.1
+
+-- cgf c ↪ af₁ cyclic (shape₁ c) size₁
+def lift_cgf {c α} (x : cgf c α) : af₁ cyclic (shape₁ c) size₁ α :=
+⟨⟨x.1, x.2.1⟩, x.2.2⟩
+
+-- dgf c k ↪ af₁ (kcyclic k) (shape₁ c) size₁
+def lift_dgf {c k α} (x : dgf c k α) : af₁ (kcyclic k) (shape₁ c) size₁ α :=
+⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
@@ -66,7 +126,7 @@ attribute [simp] function.comp
 namespace function
 @[simp]
 def sum {α β γ δ} (f : α → β) (g : γ → δ) (x : α ⊕ γ) : β ⊕ δ :=
-sum.rec (f ⋆ sum.inl) (g ⋆ sum.inr) x
+sum.rec (sum.inl ∘ f) (sum.inr ∘ g) x
 
 @[simp]
 def prod {α β γ δ} (f : α → β) (g : γ → δ) (x : α × γ) : β × δ :=
@@ -74,7 +134,7 @@ def prod {α β γ δ} (f : α → β) (g : γ → δ) (x : α × γ) : β × δ
 
 @[simp]
 def dimap {α β γ δ} (f : α → β) (g : γ → δ) (x : β → γ) : α → δ :=
-f ⋆ x ⋆ g
+g ∘ x ∘ f
 end function
 
 structure {u v} iso (α : Type u) (β : Type v) :=
@@ -88,7 +148,7 @@ def inv {α β} (i : iso α β) : iso β α :=
 ⟨i.g, i.f, i.fg, i.gf⟩
 
 def comp {α β γ} (i : iso α β) (j : iso β γ) : iso α γ :=
-⟨i.f ⋆ j.f, j.g ⋆ i.g, by simp [j.gf, i.gf], by simp [i.fg, j.fg]⟩
+⟨j.f ∘ i.f, i.g ∘ j.g, by simp [j.gf, i.gf], by simp [i.fg, j.fg]⟩
 
 def {u} curry {α β γ : Type u} : iso (α → β → γ) ((α × β) → γ) :=
 ⟨λ f x, f x.1 x.2, λ f x y, f (x, y), by simp, by simp⟩
@@ -116,7 +176,7 @@ dimap i.inv j
 
 def mul_func {α β γ : Type} : iso ((α → γ) × (β → γ)) ((α ⊕ β) → γ) :=
 ⟨λ x y, sum.rec x.1 x.2 y,
- λ x, (sum.inl ⋆ x, sum.inr ⋆ x),
+ λ x, (x ∘ sum.inl, x ∘ sum.inr),
  λ x, by simp,
  λ x, by funext y; induction y; repeat { simp }⟩
 
@@ -249,7 +309,7 @@ def mul {r I₁ I₂ s₁ s₂ α} : iso ((af r I₁ s₁ α) × (af r I₂ s₂
   type_check foo r,
   -- apply foo r,
   -- type_check
-  sorry
+  repeat {sorry},
  end,
  λ x, begin
    induction x with x1 x2,
@@ -354,7 +414,7 @@ end ogf
 def kem (α) := Σ β, iso α β
 
 def icyc := Σ' p : ℕ → ℕ, ∀ i, p i = p 0 + i
-def icyclic (α) (a b : iseq α) := ∃ p : icyc, (p.1 ⋆ a) = b
+def icyclic (α) (a b : iseq α) := ∃ p : icyc, (a ∘ p.1) = b
 def isec (α) := quot (icyclic α)
 -- igf x = Σ n : ℕ, cₙ x^ℕ / ℕ
 def igf (c : ℕ → ℕ) (α) :=
