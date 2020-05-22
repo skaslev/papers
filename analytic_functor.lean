@@ -4,19 +4,22 @@ def iter {α} (g : α → α) : ℕ → α → α
 | 0 := id
 | (n+1) := iter n ∘ g
 
+structure {u v} iso (α : Type u) (β : Type v) :=
+(f : α → β) (g : β → α) (gf : Π x, g (f x) = x) (fg : Π x, f (g x) = x)
+
 def perm (n) := Σ' p : fin n → fin n, function.bijective p
-def part (k n) := Σ' p : fin n → fin k, function.surjective p
 def inorb {n} (p : perm n) (a b : fin n) := ∃ s, iter p.1 s a = b
-def factor {n} (p : perm n) : Σ' k (q : part k n), ∀ a b, q.1 a = q.1 b ↔ inorb p a b := sorry
-def kcycles (k n) := Σ' p : perm n, (factor p).1 = k
+def factor {n} (p : perm n) := quot (inorb p)
+def cyc (n : ℕ₁) := Σ' p : perm n.1, ∀ i, p.1 i = p.1 ⟨0, n.2⟩ + i
+def kcycles (k n) := Σ' p : perm n, iso (factor p) (fin k)
 
 -- fseq n x = xⁿ
 def fseq (n : ℕ) (α : Type) := fin n → α
 
 def ordered (n α) (a b : fseq n α) := a = b
 def unordered (n α) (a b : fseq n α) := ∃ p : perm n, (a ∘ p.1) = b
+def cyclic (n : ℕ₁) (α) (a b : fseq n.1 α) := ∃ p : cyc n, (a ∘ p.1.1) = b
 def kcyclic (k n : ℕ₁) (α) (a b : fseq n.1 α) := ∃ p : kcycles k.1 n.1, (a ∘ p.1.1) = b
-def cyclic := kcyclic ⟨1, nat.zero_lt_succ 0⟩
 
 -- fset n x = xⁿ / n!
 def fset (n α) := quot (unordered n α)
@@ -35,16 +38,16 @@ def ogf (c : ℕ → ℕ) (α) :=
 def egf (c : ℕ → ℕ) (α) :=
 Σ n : ℕ, fin (c n) × fset n α
 
--- cgf c x = Σ n:ℕ₁, cₙ xⁿ / n
-def cgf (c : ℕ₁ → ℕ) (α) :=
+-- lgf c x = Σ n:ℕ₁, cₙ xⁿ / n
+def lgf (c : ℕ₁ → ℕ) (α) :=
 Σ n : ℕ₁, fin (c n) × fsec n α
 
 -- dgf c k x = Σ n:ℕ₁, cₙ xⁿ / nᵏ
 def dgf (c : ℕ₁ → ℕ) (k α) :=
 Σ n : ℕ₁, fin (c n) × fsed k n α
 
--- ζ k x = Σ n:ℕ₁, xⁿ / nᵏ
-def ζ (k) := dgf (λ _, 1) k
+-- Li k x = Σ n:ℕ₁, xⁿ / nᵏ
+def Li (k) := dgf (λ _, 1) k
 
 def rel (α) := α → α → Prop
 
@@ -110,8 +113,8 @@ end x.2⟩
 def shape₁ (c : ℕ₁ → ℕ) := Σ n, fin (c n)
 def size₁ {c} (x : shape₁ c) := x.1
 
--- cgf c ↪ af₁ cyclic (shape₁ c) size₁
-def lift_cgf {c α} (x : cgf c α) : af₁ cyclic (shape₁ c) size₁ α :=
+-- lgf c ↪ af₁ cyclic (shape₁ c) size₁
+def lift_lgf {c α} (x : lgf c α) : af₁ cyclic (shape₁ c) size₁ α :=
 ⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
 -- dgf c k ↪ af₁ (kcyclic k) (shape₁ c) size₁
@@ -136,9 +139,6 @@ def prod {α β γ δ} (f : α → β) (g : γ → δ) (x : α × γ) : β × δ
 def dimap {α β γ δ} (f : α → β) (g : γ → δ) (x : β → γ) : α → δ :=
 g ∘ x ∘ f
 end function
-
-structure {u v} iso (α : Type u) (β : Type v) :=
-(f : α → β) (g : β → α) (gf : Π x, g (f x) = x) (fg : Π x, f (g x) = x)
 
 namespace iso
 def id {α} : iso α α :=
