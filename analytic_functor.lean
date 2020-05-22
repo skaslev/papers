@@ -27,9 +27,6 @@ def fset (n α) := quot (unordered n α)
 -- fsec n x = xⁿ / n
 def fsec (n α) := quot (cyclic n α)
 
--- fsed k n x = xⁿ / nᵏ
-def fsed (k n α) := quot (kcyclic k n α)
-
 -- ogf c x = Σ n:ℕ, cₙ xⁿ
 def ogf (c : ℕ → ℕ) (α) :=
 Σ n : ℕ, fin (c n) × fseq n α
@@ -41,13 +38,6 @@ def egf (c : ℕ → ℕ) (α) :=
 -- lgf c x = Σ n:ℕ₁, cₙ xⁿ / n
 def lgf (c : ℕ₁ → ℕ) (α) :=
 Σ n : ℕ₁, fin (c n) × fsec n α
-
--- dgf c k x = Σ n:ℕ₁, cₙ xⁿ / nᵏ
-def dgf (c : ℕ₁ → ℕ) (k α) :=
-Σ n : ℕ₁, fin (c n) × fsed k n α
-
--- Li k x = Σ n:ℕ₁, xⁿ / nᵏ
-def Li (k) := dgf (λ _, 1) k
 
 def rel (α) := α → α → Prop
 
@@ -115,10 +105,6 @@ def size₁ {c} (x : shape₁ c) := x.1
 
 -- lgf c ↪ af₁ cyclic (shape₁ c) size₁
 def lift_lgf {c α} (x : lgf c α) : af₁ cyclic (shape₁ c) size₁ α :=
-⟨⟨x.1, x.2.1⟩, x.2.2⟩
-
--- dgf c k ↪ af₁ (kcyclic k) (shape₁ c) size₁
-def lift_dgf {c k α} (x : dgf c k α) : af₁ (kcyclic k) (shape₁ c) size₁ α :=
 ⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
