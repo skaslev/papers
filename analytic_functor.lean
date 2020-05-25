@@ -49,8 +49,8 @@ def rel (α) := α → α → Prop
 def af (r : Π n α, rel (fseq n α)) (I) (s : I → ℕ) (α) :=
 Σ i : I, quot (r (s i) α)
 
-def shape (c : ℕ → ℕ) := Σ n, fin (c n)
-def size {c} (x : shape c) := x.1
+def shape {I} (c : I → ℕ) := Σ n, fin (c n)
+def size {I c} (x : @shape I c) := x.1
 
 -- ogf c ↪ af ordered (shape c) size
 def lift_ogf {c α} (x : ogf c α) : af ordered (shape c) size α :=
@@ -100,11 +100,8 @@ def lift_af₁ {r I s α} (x : af₁ r I s α) : af (ext_rel₁ r) I (ext_s₁ s
   { simp [ext_rel₁] }
 end x.2⟩
 
-def shape₁ (c : ℕ₁ → ℕ) := Σ n, fin (c n)
-def size₁ {c} (x : shape₁ c) := x.1
-
--- lgf c ↪ af₁ cyclic (shape₁ c) size₁
-def lift_lgf {c α} (x : lgf c α) : af₁ cyclic (shape₁ c) size₁ α :=
+-- lgf c ↪ af₁ cyclic (shape c) size
+def lift_lgf {c α} (x : lgf c α) : af₁ cyclic (shape c) size α :=
 ⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
@@ -113,15 +110,12 @@ def lift_lgf {c α} (x : lgf c α) : af₁ cyclic (shape₁ c) size₁ α :=
 attribute [simp] function.comp
 
 namespace function
-@[simp]
 def sum {α β γ δ} (f : α → β) (g : γ → δ) (x : α ⊕ γ) : β ⊕ δ :=
 sum.rec (sum.inl ∘ f) (sum.inr ∘ g) x
 
-@[simp]
 def prod {α β γ δ} (f : α → β) (g : γ → δ) (x : α × γ) : β × δ :=
 (f x.1, g x.2)
 
-@[simp]
 def dimap {α β γ δ} (f : α → β) (g : γ → δ) (x : β → γ) : α → δ :=
 g ∘ x ∘ f
 end function
@@ -142,20 +136,20 @@ def {u} curry {α β γ : Type u} : iso (α → β → γ) ((α × β) → γ) :
 def sum {α β γ δ} (i : iso α β) (j : iso γ δ) : iso (α ⊕ γ) (β ⊕ δ) :=
 ⟨function.sum i.f j.f,
  function.sum i.g j.g,
- λ x, sum.rec (by simp [i.gf]) (by simp [j.gf]) x,
- λ x, sum.rec (by simp [i.fg]) (by simp [j.fg]) x⟩
+ λ x, sum.rec (by simp [function.sum, i.gf]) (by simp [function.sum, j.gf]) x,
+ λ x, sum.rec (by simp [function.sum, i.fg]) (by simp [function.sum, j.fg]) x⟩
 
 def prod {α β γ δ} (i : iso α β) (j : iso γ δ) : iso (α × γ) (β × δ) :=
 ⟨function.prod i.f j.f,
  function.prod i.g j.g,
- by simp [i.gf, j.gf],
- by simp [i.fg, j.fg]⟩
+ by simp [function.prod, i.gf, j.gf],
+ by simp [function.prod, i.fg, j.fg]⟩
 
 def dimap {α β γ δ} (i : iso α β) (j : iso γ δ) : iso (β → γ) (α → δ) :=
 ⟨function.dimap i.f j.f,
  function.dimap i.g j.g,
- λ x, funext (by simp [i.fg, j.gf]),
- λ x, funext (by simp [i.gf, j.fg])⟩
+ λ x, funext (by simp [function.dimap, i.fg, j.gf]),
+ λ x, funext (by simp [function.dimap, i.gf, j.fg])⟩
 
 def func {α β γ δ} (i : iso α β) (j : iso γ δ) : iso (α → γ) (β → δ) :=
 dimap i.inv j
@@ -311,15 +305,18 @@ def mul {r I₁ I₂ s₁ s₂ α} : iso ((af r I₁ s₁ α) × (af r I₂ s₂
  λ x, sorry⟩
 end af
 
-namespace ogf
-@[simp]
-def cadd (a b : ℕ → ℕ) (n : ℕ) := a n + b n
-
-@[simp]
 def delta (k n : ℕ) := if n = k then 1 else 0
 
-@[simp]
 def K (k n : ℕ) := k
+
+def partial_sum (f : ℕ → ℕ) : ℕ → ℕ
+| 0 := f 0
+| (n+1) := partial_sum n + f (n+1)
+
+namespace ogf
+def cadd (a b : ℕ → ℕ) (n : ℕ) := a n + b n
+
+def cmul (a b : ℕ → ℕ) (n : ℕ) : ℕ := partial_sum (λ k, a k * b (n - k)) n
 
 def lt_one {n : ℕ} (g : n < 1) : n = 0 :=
 begin
@@ -331,8 +328,10 @@ end
 def sum_iso (a b : ℕ → ℕ) {α} : iso (ogf a α ⊕ ogf b α) (ogf (cadd a b) α) :=
 iso.sigma_sum.comp (iso.sigma_sub (λ n, iso.distr_right.inv.comp (fin.sum.prod iso.id)))
 
+def mul_iso (a b : ℕ → ℕ) {α} : iso (ogf a α × ogf b α) (ogf (cmul a b) α) := sorry
+
 def fseq_iso (k:ℕ) {α} : iso (fseq k α) (ogf (delta k) α) :=
-⟨λ x, ⟨k, (⟨0, by simp [nat.zero_lt_succ]⟩, λ i, x i)⟩,
+⟨λ x, ⟨k, (⟨0, by simp [delta, nat.zero_lt_succ]⟩, λ i, x i)⟩,
  λ x, dite (x.1=k) (λ h, begin
   induction x with x1 x2,
   induction x2 with x2 x3,
@@ -343,7 +342,7 @@ end) (λ h, begin
   induction x with x1 x2,
   induction x2 with x2 x3,
   simp at h,
-  simp [h] at x2,
+  simp [delta, h] at x2,
   exact fin.elim0 x2
 end),
  λ x, by simp; refl,
@@ -363,7 +362,7 @@ end),
       { sorry },
       { sorry }},
     { exact false.elim (h (lt_one x2.2)) }},
-  { simp [h] at x2,
+  { simp [delta, h] at x2,
     exact fin.elim0 x2 }
  end⟩
 
