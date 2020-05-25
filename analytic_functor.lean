@@ -396,6 +396,48 @@ def id_iso {α} : iso α (ogf (delta 1) α) :=
 fseq_id_iso.comp (fseq_iso 1)
 end ogf
 
+namespace list
+open ogf
+
+def def_iso {α} : iso (list α) (unit ⊕ α × (list α)) :=
+⟨λ x, list.rec (sum.inl ()) (λ h t ih, sum.inr (h, t)) x,
+ λ x, sum.rec (λ y, []) (λ y, y.1 :: y.2) x,
+ λ x, by induction x; repeat { simp },
+ λ x, by induction x; { induction x, refl }; { simp }⟩
+
+def cs_eq (s : ℕ → ℕ) := s = cadd (delta 0) (cmul (delta 1) s)
+
+def cs := K 1
+
+def cs_sat : cs_eq cs :=
+begin
+  simp [cs_eq, cs],
+  funext n,
+  dsimp [K, cadd],
+  induction n with n ih,
+  { simp [cs, cadd, cmul, delta, partial_sum] },
+  { simp [delta, if_neg (nat.add_one_ne_zero n)],
+    simp [K, cs, cmul, partial_sum],
+    induction n with n ih₂,
+    { dsimp [partial_sum, delta],
+      have h:¬0=1:=λ x, by simp at x; exact x,
+      simp [if_neg h] },
+    { dsimp [partial_sum],
+      sorry
+    }
+  }
+end
+end list
+
+-- From Generatingfunctionology pg. 18
+-- B₀(x) = 1, ∀ k>0:
+-- Bₖ(x) = x Bₖ₋₁(x) + k x Bₖ(x)
+-- ⇒ Bₖ x = x/(1-kx) Bₖ₋₁(x)
+inductive B (α : Type) : ℕ → Type
+| B₀ : B 0
+| B₁ {k} : α → (B k) → B (k+1)
+| B₂ {k} : fin (k+1) → α → B (k+1) → B (k+1)
+
 def kem (α) := Σ β, iso α β
 
 def icyc := Σ' p : ℕ → ℕ, ∀ i, p i = p 0 + i
