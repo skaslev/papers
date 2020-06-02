@@ -52,5 +52,5 @@ def sf_iso {g α} : iso (S g α) (F g α) :=
 ⟨from_s, to_s, to_s_from_s, from_s_to_s⟩
 
 -- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
--- Thm fins_iso: ∀ n:ℕ, gⁿ(unit) = Σ k:ℕ, fin k → fin n
--- => f(unit) = Σ n:ℕ, gⁿ(unit) = Σ n:ℕ, Σ k:ℕ, fin k → fin n
+-- ⇒ gⁿ(1) = Σ k:ℕ, fin k → fin n
+-- ⇒ f(1) = Σ n:ℕ, gⁿ(1) = Σ n:ℕ, Σ k:ℕ, fin k → fin n
