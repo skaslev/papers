@@ -732,10 +732,24 @@ def ogf_iso {n} : (Σ k, fin k → fin n) ≃ ogf (λ k, n^k) unit :=
 iso.sigma_subst (λ k, iso.unit_mul_right ⋆ iso.mul fin.pow_iso fseq.unit_iso₂⁻¹)
 end fins
 
+namespace empty_list
 -- list(0) = 1
-def list_unit_iso : list empty ≃ unit :=
-iso.map fin.empty_iso⁻¹ ⋆ list.geom_iso ⋆ ax₁ ⋆
-  iso.add fins.unit_iso (iso.sigma_subst (λ n, fins.empty_iso) ⋆ iso.sigma_empty) ⋆ iso.empty_add_right⁻¹
+def unit_iso : list empty ≃ unit :=
+⟨λ x, (),
+ λ x, [],
+ λ x, list.rec rfl (λ h t ih, empty.rec _ h) x,
+ isprop_unit _⟩
+
+def unit_iso₁ : list empty ≃ unit :=
+list.def_iso ⋆ iso.add_right iso.empty_mul_left⁻¹ ⋆ iso.empty_add_right⁻¹
+
+def unit_iso₂ : list empty ≃ unit :=
+begin
+  apply (list.def_iso ⋆ _),
+  apply (iso.add_right iso.empty_mul_left.inv ⋆ _),
+  apply iso.empty_add_right.inv
+end
+end empty_list
 
 -- Balanced Trees[4,5,6]
 -- [4] https://github.com/skaslev/papers/blob/master/iterating.pdf
