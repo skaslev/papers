@@ -50,6 +50,14 @@ def egf (c : ℕ → ℕ) (α) :=
 def lgf (c : ℕ₁ → ℕ) (α) :=
 Σ n : ℕ₁, fin (c n) × fsec n α
 
+-- TODO: Dirichlet generating function
+-- dgf k c x = Σ n:ℕ₁, cₙ xⁿ / nᵏ
+--
+-- def dirichlet (k n : ℕ₁) (α) (a b : fseq n.1 α) :=
+-- ∃ p : ???, (a ∘ p.1.1) = b
+-- def dgf (k : ℕ₁) (c : ℕ₁ → ℕ) (α) :=
+-- Σ n : ℕ₁, fin (c n) × quot (dirichlet k n α)
+
 def rel (α) := α → α → Prop
 
 -- Analytic functor
@@ -218,7 +226,7 @@ def mul_func₂ {α β γ : Type} : (α → β) × (α → γ) ≃ α → β × 
 def sigma_subst {α} {β γ : α → Type} (i : Π a:α, β a ≃ γ a) : (Σ a:α, β a) ≃ Σ a:α, γ a :=
 ⟨λ x, ⟨x.1, (i x.1).f x.2⟩,
  λ x, ⟨x.1, (i x.1).g x.2⟩,
- λ x, begin induction x with x₁ x₂, simp [(i x₁).gf], end,
+ λ x, begin induction x with x₁ x₂, simp [(i x₁).gf] end,
  λ x, begin induction x with x₁ x₂, simp [(i x₁).fg] end⟩
 
 def sigma_add {α} {β γ : α → Type} : ((Σ a : α, β a) ⊕ (Σ a : α, γ a)) ≃ Σ a : α, β a ⊕ γ a :=
@@ -313,7 +321,7 @@ def lt_one {n : ℕ} (g : n < 1) : n = 0 :=
 begin
   induction n with n ih,
   { refl },
-  { exact false.elim (nat.not_lt_zero n (nat.lt_of_succ_lt_succ g)) },
+  { exact false.elim (nat.not_lt_zero n (nat.lt_of_succ_lt_succ g)) }
 end
 
 section generic_summation
@@ -446,7 +454,7 @@ def add_iso {a b} : fin a ⊕ fin b ≃ fin (a + b) :=
  end⟩
 
 def add_unit_iso {n} : unit ⊕ fin n ≃ fin (n+1) :=
-iso.add_comm ⋆ iso.add_right fin.unit_iso.inv ⋆ fin.add_iso
+iso.add_comm ⋆ iso.add_right unit_iso.inv ⋆ add_iso
 
 def two_iso : fin 2 ≃ unit ⊕ unit :=
 add_iso⁻¹ ⋆ iso.add unit_iso unit_iso
@@ -536,7 +544,6 @@ def add_iso {r I₁ I₂ s₁ s₂ α} : (af r I₁ s₁ α) ⊕ (af r I₂ s₂
  λ x, by induction x; repeat { simp [prod.mk.eta] },
  λ x, by induction x with x₁ x₂; induction x₁; repeat { refl }⟩
 
-
 def mul_iso {r I₁ I₂ s₁ s₂ α} : (af r I₁ s₁ α) × (af r I₂ s₂ α) ≃ af r (I₁ × I₂) (smul s₁ s₂) α :=
 sorry
 end af
@@ -582,12 +589,28 @@ namespace id
 def ogf_iso {α} : α ≃ ogf (delta 1) α :=
 fseq.id_iso⁻¹ ⋆ fseq.ogf_iso
 
+-- x = x¹
 def unit_iso {α} : α ≃ unit → α :=
 ⟨λ x y, x,
  λ x, x (),
  λ x, rfl,
  λ x, funext (λ y, punit.rec rfl y)⟩
 end id
+
+def sq (α) := α × α
+
+namespace sq
+-- sq x = x²
+def fseq_iso {α} : sq α ≃ fseq 2 α :=
+begin
+  apply (_ ⋆ iso.func_left fin.two_iso.inv),
+  apply (_ ⋆ iso.mul_func₁),
+  apply iso.mul id.unit_iso id.unit_iso
+end
+
+def ogf_iso {α} : sq α ≃ ogf (delta 2) α :=
+fseq_iso ⋆ fseq.ogf_iso
+end sq
 
 namespace option
 -- option x = 1 + x
@@ -736,12 +759,14 @@ def empty_iso {n} : fin (n + 1) → fin 0 ≃ empty :=
 def list_iso {n} : (Σ k, fin k → fin n) ≃ list (fin n) :=
 list.geom_iso⁻¹
 
+def cf (n k : ℕ) := n^k
+
 -- Σ k, nᵏ = ogf (λ k, n^k) 1
-def ogf_iso {n} : (Σ k, fin k → fin n) ≃ ogf (λ k, n^k) unit :=
+def ogf_iso {n} : (Σ k, fin k → fin n) ≃ ogf (cf n) unit :=
 iso.sigma_subst (λ k, iso.unit_mul_right ⋆ iso.mul fin.pow_iso fseq.unit_iso₂⁻¹)
 end fins
 
-namespace empty_list
+namespace list_empty
 -- list(0) = 1
 def unit_iso : list empty ≃ unit :=
 ⟨λ x, (),
@@ -758,7 +783,7 @@ begin
   apply (iso.add_right iso.empty_mul_left.inv ⋆ _),
   apply iso.empty_add_right.inv
 end
-end empty_list
+end list_empty
 
 -- Balanced Trees[4,5,6]
 -- [4] https://github.com/skaslev/papers/blob/master/iterating.pdf
@@ -802,7 +827,7 @@ begin
 end
 
 -- s(x) = f(x)
-def f_iso {g : Type → Type} {α} : S g α ≃ F g α :=
+def f_iso {g α} : S g α ≃ F g α :=
 ⟨code, deco, deco_code, code_deco⟩
 end S
 
@@ -914,13 +939,13 @@ list_iso ⋆ iso.unit_mul_left⁻¹ ⋆ iso.map iso.unit_mul_right⁻¹
 def fins_iso {n} : iter G n unit ≃ Σ k, fin k → fin n :=
 list_iso₁ ⋆ fins.list_iso⁻¹
 
-def cf (n k : ℕ) : ℕ := dite (k = 0) (λ _, 0) (λ _, n^(k-1))
+def cf (n k : ℕ) : ℕ := ite (k = 0) 0 (n^(k-1))
 
 def cf_lemma₁ (n : ℕ) : cf n 0 = 0 :=
 by simp [cf]
 
 def cf_lemma₂ (n k : ℕ) : cf n (k+1) = n^k :=
-by simp [cf, dif_neg (nat.succ_ne_zero k)]
+by simp [cf, if_neg (nat.succ_ne_zero k)]
 
 -- gⁿ(x) = Σ k:ℕ, nᵏ xᵏ⁺¹
 def ogf_iso {n α} : iter G n α ≃ ogf (cf n) α :=
@@ -939,6 +964,10 @@ begin
   rw cf_lemma₂,
   apply fin.pow_iso
 end
+
+-- gⁿ(1) = Σ k:ℕ, n^k
+def ogf_iso₁ {n} : iter G n unit ≃ ogf (fins.cf n) unit :=
+fins_iso ⋆ fins.ogf_iso
 end Gⁿ
 
 namespace SG
@@ -951,20 +980,6 @@ iso.sigma_subst (λ n, Gⁿ.list_iso)
 def list_iso₁ : S G unit ≃ Σ n, list (fin n) :=
 fins_iso ⋆ iso.sigma_subst (λ n, fins.list_iso)
 end SG
-
-def sq (α : Type) := α × α
-
-namespace sq
-def fseq_iso {α} : sq α ≃ fseq 2 α :=
-begin
-  apply (_ ⋆ iso.func_left fin.two_iso.inv),
-  apply (_ ⋆ iso.mul_func₁),
-  apply iso.mul id.unit_iso id.unit_iso
-end
-
-def ogf_iso {α} : sq α ≃ ogf (delta 2) α :=
-fseq_iso ⋆ fseq.ogf_iso
-end sq
 
 namespace FG
 def fins_iso : F G unit ≃ Σ n k, fin k → fin n :=
