@@ -970,15 +970,25 @@ def ogf_iso₁ {n} : iter G n unit ≃ ogf (fins.cf n) unit :=
 fins_iso ⋆ fins.ogf_iso
 end Gⁿ
 
+-- ζₛ(k) = Σ n:ℕ, nᵏ
+def ζₛ (k : ℕ) := Σ n, fin k → fin n
+
 namespace SG
+-- S(G,1) = Σ n k:ℕ, nᵏ
 def fins_iso : S G unit ≃ Σ n k, fin k → fin n :=
 iso.sigma_subst (λ n, Gⁿ.fins_iso)
 
+-- S(G,x) = Σ n:ℕ, x/(1-nx)
 def list_iso {α} : S G α ≃ Σ n, α × list (fin n × α) :=
 iso.sigma_subst (λ n, Gⁿ.list_iso)
 
+-- S(G,1) = Σ n:ℕ, 1/(1-n)
 def list_iso₁ : S G unit ≃ Σ n, list (fin n) :=
 fins_iso ⋆ iso.sigma_subst (λ n, fins.list_iso)
+
+-- S(G,1) = Σ k:ℕ, ζₛ(k)
+def zeta_iso : S G unit ≃ Σ k, ζₛ k :=
+fins_iso ⋆ iso.sigma_swap
 end SG
 
 namespace FG
@@ -990,6 +1000,9 @@ S.f_iso⁻¹ ⋆ SG.list_iso
 
 def list_iso₁ : F G unit ≃ Σ n, list (fin n) :=
 S.f_iso⁻¹ ⋆ SG.list_iso₁
+
+def zeta_iso : F G unit ≃ Σ k, ζₛ k :=
+S.f_iso⁻¹ ⋆ SG.zeta_iso
 end FG
 
 -- From Generatingfunctionology[7] pg. 18
