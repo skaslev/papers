@@ -448,6 +448,9 @@ def add_iso {a b} : fin a ⊕ fin b ≃ fin (a + b) :=
 def add_unit_iso {n} : unit ⊕ fin n ≃ fin (n+1) :=
 iso.add_comm ⋆ iso.add_right fin.unit_iso.inv ⋆ fin.add_iso
 
+def two_iso : fin 2 ≃ unit ⊕ unit :=
+add_iso⁻¹ ⋆ iso.add unit_iso unit_iso
+
 def mul_iso {n m} : fin n × fin m ≃ fin (n * m) :=
 sorry
 
@@ -578,6 +581,12 @@ end unit
 namespace id
 def ogf_iso {α} : α ≃ ogf (delta 1) α :=
 fseq.id_iso⁻¹ ⋆ fseq.ogf_iso
+
+def unit_iso {α} : α ≃ unit → α :=
+⟨λ x y, x,
+ λ x, x (),
+ λ x, rfl,
+ λ x, funext (λ y, punit.rec rfl y)⟩
 end id
 
 namespace option
@@ -942,6 +951,20 @@ iso.sigma_subst (λ n, Gⁿ.list_iso)
 def list_iso₁ : S G unit ≃ Σ n, list (fin n) :=
 fins_iso ⋆ iso.sigma_subst (λ n, fins.list_iso)
 end SG
+
+def sq (α : Type) := α × α
+
+namespace sq
+def fseq_iso {α} : sq α ≃ fseq 2 α :=
+begin
+  apply (_ ⋆ iso.func_left fin.two_iso.inv),
+  apply (_ ⋆ iso.mul_func₁),
+  apply iso.mul id.unit_iso id.unit_iso
+end
+
+def ogf_iso {α} : sq α ≃ ogf (delta 2) α :=
+fseq_iso ⋆ fseq.ogf_iso
+end sq
 
 namespace FG
 def fins_iso : F G unit ≃ Σ n k, fin k → fin n :=
