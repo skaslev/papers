@@ -1039,3 +1039,12 @@ variable linear : Π {α β γ : Type}, (γ ≃ α ⊕ β × γ) → (γ ≃ α 
 def wat : unit ≃ empty :=
 linear (iso.unit_mul_left ⋆ iso.empty_add_left) ⋆ iso.empty_mul_left⁻¹
 end linear
+
+-- Adjoint functors
+-- bᶠ⁽ᵃ⁾ = g(b)ᵃ
+def adj (f g : Type → Type) (α β) := (f α → β) ≃ (α → g β)
+
+namespace adj
+def curry (α : Type) {β γ} : adj (λ x, x × α) (λ x, α → x) β γ :=
+iso.curry⁻¹
+end adj
