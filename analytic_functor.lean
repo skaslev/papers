@@ -390,6 +390,10 @@ def partial_sum (f : ℕ → ℕ) : ℕ → ℕ
 | 0 := f 0
 | (n+1) := partial_sum n + f (n+1)
 
+def take {α} (c : ℕ → α) : ℕ → list α
+| 0 := []
+| (n+1) := take n ++ [c n]
+
 namespace fin
 @[simp]
 def mk.eta {n} (i : fin n) {h} : fin.mk i.val h = i :=
