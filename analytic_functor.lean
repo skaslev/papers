@@ -40,15 +40,15 @@ def fsec (n α) := quot (cyclic n α)
 
 -- ogf c x = Σ n:ℕ, cₙ xⁿ
 def ogf (c : ℕ → ℕ) (α) :=
-Σ n : ℕ, fin (c n) × fseq n α
+Σ n:ℕ, fin (c n) × fseq n α
 
 -- egf c x = Σ n:ℕ, cₙ xⁿ / n!
 def egf (c : ℕ → ℕ) (α) :=
-Σ n : ℕ, fin (c n) × fset n α
+Σ n:ℕ, fin (c n) × fset n α
 
 -- lgf c x = Σ n:ℕ₁, cₙ xⁿ / n
 def lgf (c : ℕ₁ → ℕ) (α) :=
-Σ n : ℕ₁, fin (c n) × fsec n α
+Σ n:ℕ₁, fin (c n) × fsec n α
 
 -- TODO: Dirichlet generating function
 -- dgf k c x = Σ n:ℕ₁, cₙ xⁿ / nᵏ
@@ -56,7 +56,7 @@ def lgf (c : ℕ₁ → ℕ) (α) :=
 -- def dirichlet (k n : ℕ₁) (α) (a b : fseq n.1 α) :=
 -- ∃ p : ???, (a ∘ p.1.1) = b
 -- def dgf (k : ℕ₁) (c : ℕ₁ → ℕ) (α) :=
--- Σ n : ℕ₁, fin (c n) × quot (dirichlet k n α)
+-- Σ n:ℕ₁, fin (c n) × quot (dirichlet k n α)
 
 def rel (α) := α → α → Prop
 
@@ -66,7 +66,7 @@ def rel (α) := α → α → Prop
 -- [3] https://www.ms.u-tokyo.ac.jp/~ryu/papers/taa.ps
 -- af r s x = Σ i:I, x^s(i) / r(s(i))
 def af (r : Π n α, rel (fseq n α)) (I) (s : I → ℕ) (α) :=
-Σ i : I, quot (r (s i) α)
+Σ i:I, quot (r (s i) α)
 
 def shape {N} (c : N → ℕ) := Σ n, fin (c n)
 def size {N c} (x : @shape N c) := x.1
@@ -90,7 +90,7 @@ def seqω : ℕω → Type → Type
 | ℕω.inf := iseq
 
 def afω (r : Π n α, rel (seqω n α)) (I) (s : I → ℕω) (α) :=
-Σ i : I, quot (r (s i) α)
+Σ i:I, quot (r (s i) α)
 
 def ext_relω (r : Π n α, rel (fseq n α)) (q : Π α, rel (iseq α)) : Π n α, rel (seqω n α)
 | (ℕω.fin n) := r n
@@ -101,7 +101,7 @@ def lift_af {r I s α} (q : Π α, rel (iseq α)) (x : af r I s α) : afω (ext_
 x
 
 def af₁ (r : Π (n:ℕ₁) α, rel (fseq n.1 α)) (I) (s : I → ℕ₁) (α) :=
-Σ i : I, quot (r (s i) α)
+Σ i:I, quot (r (s i) α)
 
 def ext_rel₁ (r : Π (n:ℕ₁) α, rel (fseq n.1 α)) : Π n α, rel (fseq n α)
 | 0 := λ α a b, true  -- `fseq 0 α` is a singleton type
@@ -239,13 +239,13 @@ def sigma_subst {α} {β γ : α → Type} (i : Π a:α, β a ≃ γ a) : (Σ a:
  λ x, begin induction x with x₁ x₂, simp [(i x₁).gf] end,
  λ x, begin induction x with x₁ x₂, simp [(i x₁).fg] end⟩
 
-def sigma_add {α} {β γ : α → Type} : ((Σ a : α, β a) ⊕ (Σ a : α, γ a)) ≃ Σ a : α, β a ⊕ γ a :=
+def sigma_add {α} {β γ : α → Type} : ((Σ a:α, β a) ⊕ (Σ a:α, γ a)) ≃ Σ a:α, β a ⊕ γ a :=
 ⟨λ x, sum.rec (λ y, ⟨y.1, sum.inl y.2⟩) (λ y, ⟨y.1, sum.inr y.2⟩) x,
  λ x, sum.rec (λ y, sum.inl ⟨x.1, y⟩) (λ y, sum.inr ⟨x.1, y⟩) x.2,
  λ x, by induction x; repeat { dsimp, rw sigma.mk.eta },
  λ x, by induction x with x₁ x₂; induction x₂; repeat { refl }⟩
 
-def sigma_distr {α β} {γ : β → Type} : (α × Σ b : β, γ b) ≃ Σ b : β, α × γ b :=
+def sigma_distr {α β} {γ : β → Type} : (α × Σ b:β, γ b) ≃ Σ b:β, α × γ b :=
 ⟨λ x, ⟨x.2.1, (x.1, x.2.2)⟩,
  λ x, (x.2.1, ⟨x.1, x.2.2⟩),
  λ x, by simp,
@@ -257,7 +257,7 @@ def sigma_swap {γ : ℕ → ℕ → Type}: (Σ n k, γ n k) ≃ Σ k n, γ n k 
  λ x, by simp,
  λ x, by simp⟩
 
-def sigma_zero {α} : (Σ a : α, 0) ≃ 0 :=
+def sigma_zero {α} : (Σ a:α, 0) ≃ 0 :=
 ⟨λ x, x.2, λ x, pempty.rec _ x,
  λ x, pempty.rec _ x.2, λ x, pempty.rec _ x⟩
 
@@ -815,7 +815,7 @@ inductive F (g : Type → Type) : Type → Type 1
 | F₁ {α} : F (g α) → F α
 
 -- s(x) = Σ n:ℕ, gⁿ(x)
-def S (g : Type → Type) (α) := Σ n : ℕ, iter g n α
+def S (g : Type → Type) (α) := Σ n:ℕ, iter g n α
 
 namespace S
 def diter {β : Type → Type 1} {γ : Type → Type} (g : Π {α}, β (γ α) → β α) : Π (n : ℕ) {α}, β (iter γ n α) → β α
@@ -1040,9 +1040,9 @@ def ogf_fixed (f : ℕ → ℕ) := Σ α, α ≃ ogf f α
 def icyc := Σ' p : ℕ → ℕ, ∀ i, p i = p 0 + i
 def icyclic (α) (a b : iseq α) := ∃ p : icyc, (a ∘ p.1) = b
 def isec (α) := quot (icyclic α)
--- igf c x = Σ n : ℕ, cₙ x^ℕ / ℕ
+-- igf c x = Σ n:ℕ, cₙ x^ℕ / ℕ
 def igf (c : ℕ → ℕ) (α) :=
-Σ n : ℕ, fin (c n) × isec α
+Σ n:ℕ, fin (c n) × isec α
 
 namespace linear
 -- c = a + b c ⇒ c = a / (1 - b)
