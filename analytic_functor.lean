@@ -1032,8 +1032,8 @@ def igf (c : ℕ → ℕ) (α) :=
 
 namespace linear
 -- c = a + b c ⇒ c = a / (1 - b)
--- yet, linear → (unit ≃ empty), is false
--- because 1 = 0 + 1×1 ⇒ 1 = 0 / (1 - 1) = 0, _|_
+-- yet `linear` is false because that would imply `unit ≃ empty`
+-- 1 = 0 + 1×1 ⇒ 1 = 0 / (1 - 1) = 0, _|_
 variable linear : Π {α β γ : Type}, (γ ≃ α ⊕ β × γ) → (γ ≃ α × list β)
 
 def wat : unit ≃ empty :=
