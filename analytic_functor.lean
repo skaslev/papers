@@ -129,9 +129,19 @@ def lift_lgf {c α} (x : lgf c α) : af₁ cyclic (shape c) size α :=
 def {u} id_def {α : Sort u} : id = λ x:α, x :=
 funext (λ _, rfl)
 
+inductive {u} pempty : Sort u
+
+@[instance]
+def {u} sort_has_zero : has_zero (Sort u) :=
+{zero:=pempty}
+
+@[instance]
+def {u} sort_has_one : has_one (Sort u) :=
+{one:=punit}
+
 def isprop (α : Type) := ∀ x y : α, x = y
 
-def isprop_unit : isprop unit
+def isprop_one : isprop 1
 | () () := rfl
 
 attribute [simp] function.comp
@@ -247,11 +257,11 @@ def sigma_swap {γ : ℕ → ℕ → Type}: (Σ n k, γ n k) ≃ Σ k n, γ n k 
  λ x, by simp,
  λ x, by simp⟩
 
-def sigma_empty {α} : (Σ a : α, empty) ≃ empty :=
-⟨λ x, x.2, λ x, empty.rec _ x,
- λ x, empty.rec _ x.2, λ x, empty.rec _ x⟩
+def sigma_zero {α} : (Σ a : α, 0) ≃ 0 :=
+⟨λ x, x.2, λ x, pempty.rec _ x,
+ λ x, pempty.rec _ x.2, λ x, pempty.rec _ x⟩
 
-def sigma_unit {α} : (Σ a:α, unit) ≃ α :=
+def sigma_one {α} : (Σ a:α, 1) ≃ α :=
 ⟨λ x, x.1,
  λ x, ⟨x, ()⟩,
  λ x, by induction x with x₁ x₂; induction x₂; refl,
@@ -287,34 +297,34 @@ def distr_right {α β γ} : (α ⊕ β) × γ ≃ α × γ ⊕ β × γ :=
 def distr_left {α β γ} : α × (β ⊕ γ) ≃ α × β ⊕ α × γ :=
 mul_comm ⋆ distr_right ⋆ add mul_comm mul_comm
 
-def empty_add_right {α} : α ≃ α ⊕ empty :=
-⟨sum.inl, λ x, sum.rec id (empty.rec _) x,
- λ x, rfl, λ x, sum.rec (λ y, rfl) (empty.rec _) x⟩
+def zero_add_right {α} : α ≃ α ⊕ 0 :=
+⟨sum.inl, λ x, sum.rec id (pempty.rec _) x,
+ λ x, rfl, λ x, sum.rec (λ y, rfl) (pempty.rec _) x⟩
 
-def empty_add_left {α} : α ≃ empty ⊕ α :=
-empty_add_right ⋆ add_comm
+def zero_add_left {α} : α ≃ 0 ⊕ α :=
+zero_add_right ⋆ add_comm
 
-def empty_mul_right {α} : empty ≃ α × empty :=
-⟨λ x, empty.rec _ x, λ x, empty.rec _ x.2,
- λ x, empty.rec _ x, λ x, empty.rec _ x.2⟩
+def zero_mul_right {α} : 0 ≃ α × 0 :=
+⟨λ x, pempty.rec _ x, λ x, pempty.rec _ x.2,
+ λ x, pempty.rec _ x, λ x, pempty.rec _ x.2⟩
 
-def empty_mul_left {α} : empty ≃ empty × α :=
-empty_mul_right ⋆ mul_comm
+def zero_mul_left {α} : 0 ≃ 0 × α :=
+zero_mul_right ⋆ mul_comm
 
-def unit_mul_right {α} : α ≃ α × unit :=
+def one_mul_right {α} : α ≃ α × 1 :=
 ⟨λ x, (x, ()),
  λ x, x.1,
  λ x, by simp,
  λ x, by induction x with x₁ x₂; congr⟩
 
-def unit_mul_left {α} : α ≃ unit × α :=
-unit_mul_right ⋆ mul_comm
+def one_mul_left {α} : α ≃ 1 × α :=
+one_mul_right ⋆ mul_comm
 
-def distr_unit_left {α β} : α ⊕ α × β ≃ α × (unit ⊕ β) :=
-add_left unit_mul_right ⋆ distr_left⁻¹
+def distr_one_left {α β} : α ⊕ α × β ≃ α × (1 ⊕ β) :=
+add_left one_mul_right ⋆ distr_left⁻¹
 
-def distr_unit_right {α β} : α ⊕ β × α ≃ (unit ⊕ β) × α :=
-add_right mul_comm ⋆ distr_unit_left ⋆ mul_comm
+def distr_one_right {α β} : α ⊕ β × α ≃ (1 ⊕ β) × α :=
+add_right mul_comm ⋆ distr_one_left ⋆ mul_comm
 end iso
 
 def lt_one {n : ℕ} (g : n < 1) : n = 0 :=
@@ -385,11 +395,11 @@ namespace fin
 def mk.eta {n} (i : fin n) {h} : fin.mk i.val h = i :=
 by induction i; simp
 
-def empty_iso : fin 0 ≃ empty :=
-⟨λ x, fin.elim0 x, λ x, empty.rec _ x,
- λ x, fin.elim0 x, λ x, empty.rec _ x⟩
+def zero_iso : fin 0 ≃ 0 :=
+⟨λ x, fin.elim0 x, λ x, pempty.rec _ x,
+ λ x, fin.elim0 x, λ x, pempty.rec _ x⟩
 
-def unit_iso : fin 1 ≃ unit :=
+def one_iso : fin 1 ≃ 1 :=
 ⟨λ x, (),
  λ x, 0,
  λ x, by induction x with x h; simp [lt_one h]; congr,
@@ -453,11 +463,11 @@ def add_iso {a b} : fin a ⊕ fin b ≃ fin (a + b) :=
      { simp [nat.add_sub_of_le (nat.le_of_lt i)] }}
  end⟩
 
-def add_unit_iso {n} : unit ⊕ fin n ≃ fin (n+1) :=
-iso.add_comm ⋆ iso.add_right unit_iso.inv ⋆ add_iso
+def add_one_iso {n} : 1 ⊕ fin n ≃ fin (n+1) :=
+iso.add_comm ⋆ iso.add_right one_iso.inv ⋆ add_iso
 
-def two_iso : fin 2 ≃ unit ⊕ unit :=
-add_iso⁻¹ ⋆ iso.add unit_iso unit_iso
+def two_iso : fin 2 ≃ 1 ⊕ 1 :=
+add_iso⁻¹ ⋆ iso.add one_iso one_iso
 
 def mul_iso {n m} : fin n × fin m ≃ fin (n * m) :=
 sorry
@@ -468,18 +478,18 @@ end fin
 
 namespace fseq
 -- x⁰ = 1
-def unit_iso {α} : fseq 0 α ≃ unit :=
+def one_iso {α} : fseq 0 α ≃ 1 :=
 ⟨λ x, (),
  λ x, fin.elim0,
  λ x, by funext y; exact fin.elim0 y,
  λ x, by induction x; refl⟩
 
 -- 1ⁿ = 1
-def unit_iso₂ {n} : fseq n unit ≃ unit :=
+def one_iso₂ {n} : fseq n 1 ≃ 1 :=
 ⟨λ x, (),
  λ x n, (),
- λ x, by funext; apply isprop_unit,
- λ x, by apply isprop_unit⟩
+ λ x, by funext; apply isprop_one,
+ λ x, by apply isprop_one⟩
 
 -- x¹ = x
 def id_iso {α} : fseq 1 α ≃ α :=
@@ -565,7 +575,7 @@ iso.sigma_add ⋆ iso.sigma_subst (λ n, iso.distr_right⁻¹ ⋆ iso.mul_left f
 def foo_iso {c : ℕ → ℕ} {α} : (Σ n, fin (c n) × fseq n α) ≃ fin (c 0) ⊕ α × Σ n, fin (c (n+1)) × fseq n α :=
 begin
   apply (ax₁ ⋆ _),
-  apply (iso.add_left (iso.mul_right fseq.unit_iso ⋆ iso.unit_mul_right.inv) ⋆ _),
+  apply (iso.add_left (iso.mul_right fseq.one_iso ⋆ iso.one_mul_right.inv) ⋆ _),
   apply iso.add_right,
   apply (_ ⋆ ax₂),
   apply iso.sigma_subst (λ n, _),
@@ -579,23 +589,23 @@ def mul_iso {a b α} : ogf a α × ogf b α ≃ ogf (cmul a b) α :=
 sorry
 end ogf
 
-namespace empty
-def ogf_iso {α} : empty ≃ ogf (K 0) α :=
-⟨λ x, empty.rec _ x, λ x, fin.elim0 x.2.1,
- λ x, empty.rec _ x, λ x, fin.elim0 x.2.1⟩
-end empty
+namespace zero
+def ogf_iso {α} : 0 ≃ ogf (K 0) α :=
+⟨λ x, pempty.rec _ x, λ x, fin.elim0 x.2.1,
+ λ x, pempty.rec _ x, λ x, fin.elim0 x.2.1⟩
+end zero
 
-namespace unit
-def ogf_iso {α} : unit ≃ ogf (delta 0) α :=
-fseq.unit_iso⁻¹ ⋆ fseq.ogf_iso
-end unit
+namespace one
+def ogf_iso {α} : 1 ≃ ogf (delta 0) α :=
+fseq.one_iso⁻¹ ⋆ fseq.ogf_iso
+end one
 
 namespace id
 def ogf_iso {α} : α ≃ ogf (delta 1) α :=
 fseq.id_iso⁻¹ ⋆ fseq.ogf_iso
 
 -- x = x¹
-def unit_iso {α} : α ≃ unit → α :=
+def one_iso {α} : α ≃ 1 → α :=
 ⟨λ x y, x,
  λ x, x (),
  λ x, rfl,
@@ -610,7 +620,7 @@ def fseq_iso {α} : sq α ≃ fseq 2 α :=
 begin
   apply (_ ⋆ iso.func_left fin.two_iso.inv),
   apply (_ ⋆ iso.mul_func₁),
-  apply iso.mul id.unit_iso id.unit_iso
+  apply iso.mul id.one_iso id.one_iso
 end
 
 def ogf_iso {α} : sq α ≃ ogf (delta 2) α :=
@@ -619,7 +629,7 @@ end sq
 
 namespace option
 -- option x = 1 + x
-def def_iso {α} : option α ≃ unit ⊕ α :=
+def def_iso {α} : option α ≃ 1 ⊕ α :=
 ⟨λ x, option.rec (sum.inl ()) sum.inr x,
  λ x, sum.rec (λ _, option.none) option.some x,
  λ x, by induction x; repeat { simp },
@@ -637,29 +647,29 @@ def ogf_iso {α} : option α ≃ ogf cf α :=
 begin
   apply (def_iso ⋆ _),
   apply (_ ⋆ ax₁.inv),
-  apply (_ ⋆ iso.add_left (iso.unit_mul_left ⋆ iso.mul fin.unit_iso.inv fseq.unit_iso.inv)),
+  apply (_ ⋆ iso.add_left (iso.one_mul_left ⋆ iso.mul fin.one_iso.inv fseq.one_iso.inv)),
   apply iso.add_right,
   apply (_ ⋆ ax₁.inv),
-  apply (_ ⋆ iso.add_left (iso.unit_mul_left ⋆ iso.mul fin.unit_iso.inv fseq.id_iso.inv)),
-  apply (iso.empty_add_right ⋆ _),
+  apply (_ ⋆ iso.add_left (iso.one_mul_left ⋆ iso.mul fin.one_iso.inv fseq.id_iso.inv)),
+  apply (iso.zero_add_right ⋆ _),
   apply iso.add_right,
   simp [cf_lemma],
-  apply (_ ⋆ iso.sigma_subst (λ n, iso.empty_mul_left ⋆ (@iso.mul_left _ _ (fseq (n + 2) α)) fin.empty_iso.inv)),
-  apply iso.sigma_empty.inv
+  apply (_ ⋆ iso.sigma_subst (λ n, iso.zero_mul_left ⋆ (@iso.mul_left _ _ (fseq (n + 2) α)) fin.zero_iso.inv)),
+  apply iso.sigma_zero.inv
 end
 end option
 
 namespace nat
 -- ℕ = 1 + ℕ
-def def_iso : ℕ ≃ unit ⊕ ℕ :=
+def def_iso : ℕ ≃ 1 ⊕ ℕ :=
 ⟨λ x, nat.rec (sum.inl ()) (λ y ih, sum.inr y) x,
  λ x, sum.rec (λ y, 0) (λ y, y+1) x,
  λ x, begin induction x with x ih, repeat { refl } end,
  λ x, begin induction x, { induction x, refl }, refl end⟩
 
 -- ℕ = Σ n:ℕ, 1
-def ogf_iso : ℕ ≃ ogf (K 1) unit :=
-iso.sigma_unit⁻¹ ⋆ iso.sigma_subst (λ n, iso.unit_mul_left ⋆ (iso.mul fin.unit_iso fseq.unit_iso₂)⁻¹)
+def ogf_iso : ℕ ≃ ogf (K 1) 1 :=
+iso.sigma_one⁻¹ ⋆ iso.sigma_subst (λ n, iso.one_mul_left ⋆ (iso.mul fin.one_iso fseq.one_iso₂)⁻¹)
 end nat
 
 -- Geometric power series
@@ -668,12 +678,12 @@ def geom (α) := Σ n, fseq n α
 
 namespace geom
 -- geom(x) = 1 + x geom(x)
-def lin_iso {α} : geom α ≃ unit ⊕ α × (geom α) :=
-ax₁ ⋆ iso.add fseq.unit_iso (iso.sigma_subst (λ n, fseq.cons_iso⁻¹) ⋆ ax₂)
+def lin_iso {α} : geom α ≃ 1 ⊕ α × (geom α) :=
+ax₁ ⋆ iso.add fseq.one_iso (iso.sigma_subst (λ n, fseq.cons_iso⁻¹) ⋆ ax₂)
 
 -- geom(x) = Σ n:ℕ, xⁿ
 def ogf_iso {α} : geom α ≃ ogf (K 1) α :=
-iso.sigma_subst (λ n, iso.unit_mul_left ⋆ iso.mul_left fin.unit_iso⁻¹)
+iso.sigma_subst (λ n, iso.one_mul_left ⋆ iso.mul_left fin.one_iso⁻¹)
 end geom
 
 inductive vec (α : Type) : ℕ → Type
@@ -681,7 +691,7 @@ inductive vec (α : Type) : ℕ → Type
 | cons {n} : α → vec n → vec (n+1)
 
 namespace vec
-def def_iso₁ {α} : vec α 0 ≃ unit :=
+def def_iso₁ {α} : vec α 0 ≃ 1 :=
 ⟨λ x, (),
  λ x, vec.nil α,
  λ x, match x with
@@ -702,7 +712,7 @@ def def_iso₂ {n α} : vec α (n+1) ≃ α × (vec α n) :=
 def fseq_iso {n α} : vec α n ≃ fseq n α :=
 begin
   induction n with n ih,
-  { exact (def_iso₁ ⋆ fseq.unit_iso.inv) },
+  { exact (def_iso₁ ⋆ fseq.one_iso.inv) },
   apply (def_iso₂ ⋆ _),
   apply (_ ⋆ fseq.cons_iso),
   apply iso.mul_right,
@@ -721,7 +731,7 @@ end vec
 
 namespace list
 -- list(x) = 1 + x list(x) = 1/(1-x)
-def def_iso {α} : list α ≃ unit ⊕ α × (list α) :=
+def def_iso {α} : list α ≃ 1 ⊕ α × (list α) :=
 ⟨λ x, list.rec (sum.inl ()) (λ h t ih, sum.inr (h, t)) x,
  λ x, sum.rec (λ y, []) (λ y, y.1 :: y.2) x,
  λ x, by induction x; repeat { simp },
@@ -741,24 +751,24 @@ def ogf_iso {α} : list α ≃ ogf (K 1) α :=
 geom_iso ⋆ geom.ogf_iso
 
 -- list(1) = ℕ
-def nat_iso : list unit ≃ ℕ :=
+def nat_iso : list 1 ≃ ℕ :=
 ogf_iso ⋆ nat.ogf_iso⁻¹
 end list
 
 namespace fins
 -- 0⁰ = 1
-def unit_iso : fin 0 → fin 0 ≃ unit :=
+def one_iso : fin 0 → fin 0 ≃ 1 :=
 ⟨λ x, (),
  λ x, fin.elim0,
  λ x, funext (λ y, fin.elim0 y),
  λ x, by induction x; refl⟩
 
 -- 0ⁿ⁺¹ = 0
-def empty_iso {n} : fin (n + 1) → fin 0 ≃ empty :=
+def zero_iso {n} : fin (n + 1) → fin 0 ≃ 0 :=
 ⟨λ x, fin.elim0 (x 0),
- λ x, empty.rec _ x,
+ λ x, pempty.rec _ x,
  λ x, funext (λ y, fin.elim0 (x y)),
- λ x, empty.rec _ x⟩
+ λ x, pempty.rec _ x⟩
 
 -- Σ k, nᵏ = 1/(1-n)
 def list_iso {n} : (Σ k, fin k → fin n) ≃ list (fin n) :=
@@ -767,28 +777,28 @@ list.geom_iso⁻¹
 def cf (n k : ℕ) := n^k
 
 -- Σ k, nᵏ = ogf (λ k, nᵏ) 1
-def ogf_iso {n} : (Σ k, fin k → fin n) ≃ ogf (cf n) unit :=
-iso.sigma_subst (λ k, iso.unit_mul_right ⋆ iso.mul fin.pow_iso fseq.unit_iso₂⁻¹)
+def ogf_iso {n} : (Σ k, fin k → fin n) ≃ ogf (cf n) 1 :=
+iso.sigma_subst (λ k, iso.one_mul_right ⋆ iso.mul fin.pow_iso fseq.one_iso₂⁻¹)
 end fins
 
-namespace list_empty
+namespace list_zero
 -- list(0) = 1
-def unit_iso : list empty ≃ unit :=
+def one_iso : list 0 ≃ 1 :=
 ⟨λ x, (),
  λ x, [],
- λ x, list.rec rfl (λ h t ih, empty.rec _ h) x,
- isprop_unit _⟩
+ λ x, list.rec rfl (λ h t ih, pempty.rec _ h) x,
+ isprop_one _⟩
 
-def unit_iso₁ : list empty ≃ unit :=
-list.def_iso ⋆ iso.add_right iso.empty_mul_left⁻¹ ⋆ iso.empty_add_right⁻¹
+def one_iso₁ : list 0 ≃ 1 :=
+list.def_iso ⋆ iso.add_right iso.zero_mul_left⁻¹ ⋆ iso.zero_add_right⁻¹
 
-def unit_iso₂ : list empty ≃ unit :=
+def one_iso₂ : list 0 ≃ 1 :=
 begin
   apply (list.def_iso ⋆ _),
-  apply (iso.add_right iso.empty_mul_left.inv ⋆ _),
-  apply iso.empty_add_right.inv
+  apply (iso.add_right iso.zero_mul_left.inv ⋆ _),
+  apply iso.zero_add_right.inv
 end
-end list_empty
+end list_zero
 
 -- Balanced Trees[4,5,6]
 -- [4] https://github.com/skaslev/papers/blob/master/iterating.pdf
@@ -850,8 +860,8 @@ def def_iso {α} : G α ≃ α ⊕ α × (G α) :=
  λ x, by induction x; repeat { simp }⟩
 
 -- g(x) = x (1 + g(x))
-def mul_iso {α} : G α ≃ α × (unit ⊕ G α) :=
-def_iso ⋆ iso.distr_unit_left
+def mul_iso {α} : G α ≃ α × (1 ⊕ G α) :=
+def_iso ⋆ iso.distr_one_left
 
 -- g(x) = x/(1-x)
 def list_iso {α} : G α ≃ α × (list α) :=
@@ -861,7 +871,7 @@ def list_iso {α} : G α ≃ α × (list α) :=
  λ x, begin induction x with x₁ x₂, induction x₂ with h t ih, { refl }, simp [ih] end⟩
 
 -- 1 + g(x) = 1/(1-x)
-def list_iso₁ {α} : unit ⊕ G α ≃ list α :=
+def list_iso₁ {α} : 1 ⊕ G α ≃ list α :=
 iso.add_right list_iso ⋆ list.def_iso⁻¹
 
 def cf (n : ℕ) := ite (n = 0) 0 1
@@ -894,20 +904,20 @@ namespace Gⁿ
 def lin_iso {n α} : iter G n α ≃ α ⊕ (fin n × α) × (iter G n α) :=
 begin
   induction n with n ih generalizing α,
-  { exact (iso.empty_add_right ⋆ iso.add_right (iso.empty_mul_left ⋆ iso.mul_left (iso.empty_mul_left ⋆ iso.mul_left fin.empty_iso.inv))) },
+  { exact (iso.zero_add_right ⋆ iso.add_right (iso.zero_mul_left ⋆ iso.mul_left (iso.zero_mul_left ⋆ iso.mul_left fin.zero_iso.inv))) },
   apply (ih ⋆ _),
   apply (iso.add_right (iso.mul_left iso.mul_comm ⋆ iso.mul_assoc.inv) ⋆ _),
-  apply (iso.distr_unit_left ⋆ _),
+  apply (iso.distr_one_left ⋆ _),
   apply (iso.mul_left G.mul_iso ⋆ iso.mul_assoc.inv ⋆ _),
   apply (_ ⋆ iso.add_right (iso.mul_assoc ⋆ iso.mul_left iso.mul_comm)),
-  apply (_ ⋆ iso.distr_unit_left.inv),
+  apply (_ ⋆ iso.distr_one_left.inv),
   apply iso.mul_right,
-  apply (iso.distr_unit_right.inv ⋆ iso.add_assoc.inv ⋆ _),
+  apply (iso.distr_one_right.inv ⋆ iso.add_assoc.inv ⋆ _),
   apply iso.add_right,
-  apply (_ ⋆ iso.mul_left fin.add_unit_iso),
-  apply (_ ⋆ iso.add_comm ⋆ iso.distr_unit_right),
+  apply (_ ⋆ iso.mul_left fin.add_one_iso),
+  apply (_ ⋆ iso.add_comm ⋆ iso.distr_one_right),
   apply iso.add_right,
-  apply (iso.distr_unit_left.inv ⋆ _),
+  apply (iso.distr_one_left.inv ⋆ _),
   apply (iso.add_right (iso.mul_assoc ⋆ iso.mul_left iso.mul_comm.inv) ⋆ _),
   apply ih.inv
 end
@@ -935,13 +945,13 @@ def gmn_iso {n m α} : fin n × iter G (n*m) α ≃ iter G m (fin n × α) :=
 begin rw nat.mul_comm, exact gnm_iso end
 
 -- gⁿ(1) = 1/(1-n)
-def list_iso₁ {n} : iter G n unit ≃ list (fin n) :=
-list_iso ⋆ iso.unit_mul_left⁻¹ ⋆ iso.map iso.unit_mul_right⁻¹
+def list_iso₁ {n} : iter G n 1 ≃ list (fin n) :=
+list_iso ⋆ iso.one_mul_left⁻¹ ⋆ iso.map iso.one_mul_right⁻¹
 
 -- gⁿ(x) = Σ k:ℕ, nᵏ x^(k+1) = x (Σ k:ℕ, nᵏxᵏ) = x/(1-nx)
 -- ⇒ gⁿ(1) = Σ k:ℕ, fin k → fin n
 -- ⇒ f(1) = Σ n:ℕ, gⁿ(1) = Σ n:ℕ, Σ k:ℕ, fin k → fin n
-def fins_iso {n} : iter G n unit ≃ Σ k, fin k → fin n :=
+def fins_iso {n} : iter G n 1 ≃ Σ k, fin k → fin n :=
 list_iso₁ ⋆ fins.list_iso⁻¹
 
 def cf (n k : ℕ) : ℕ := ite (k = 0) 0 (n^(k-1))
@@ -958,7 +968,7 @@ begin
   apply (list_iso ⋆ iso.mul_right list.geom_iso ⋆ _),
   apply (_ ⋆ ax₁.inv),
   rw cf_lemma₁,
-  apply (_ ⋆ iso.empty_add_right ⋆ iso.add_comm ⋆ iso.add_left (iso.empty_mul_left ⋆ iso.mul_left fin.empty_iso.inv)),
+  apply (_ ⋆ iso.zero_add_right ⋆ iso.add_comm ⋆ iso.add_left (iso.zero_mul_left ⋆ iso.mul_left fin.zero_iso.inv)),
   apply (ax₂.inv ⋆ _),
   apply iso.sigma_subst (λ k, _),
   apply (_ ⋆ iso.mul_assoc ⋆ iso.mul_comm ⋆ iso.mul_right fseq.cons_iso),
@@ -971,7 +981,7 @@ begin
 end
 
 -- gⁿ(1) = Σ k:ℕ, nᵏ
-def ogf_iso₁ {n} : iter G n unit ≃ ogf (fins.cf n) unit :=
+def ogf_iso₁ {n} : iter G n 1 ≃ ogf (fins.cf n) 1 :=
 fins_iso ⋆ fins.ogf_iso
 end Gⁿ
 
@@ -980,7 +990,7 @@ def ζₛ (k : ℕ) := Σ n, fin k → fin n
 
 namespace SG
 -- S G 1 = Σ n k:ℕ, nᵏ
-def fins_iso : S G unit ≃ Σ n k, fin k → fin n :=
+def fins_iso : S G 1 ≃ Σ n k, fin k → fin n :=
 iso.sigma_subst (λ n, Gⁿ.fins_iso)
 
 -- S G x = Σ n:ℕ, x/(1-nx)
@@ -988,25 +998,25 @@ def list_iso {α} : S G α ≃ Σ n, α × list (fin n × α) :=
 iso.sigma_subst (λ n, Gⁿ.list_iso)
 
 -- S G 1 = Σ n:ℕ, 1/(1-n)
-def list_iso₁ : S G unit ≃ Σ n, list (fin n) :=
+def list_iso₁ : S G 1 ≃ Σ n, list (fin n) :=
 fins_iso ⋆ iso.sigma_subst (λ n, fins.list_iso)
 
 -- S G 1 = Σ k:ℕ, ζₛ(k)
-def zeta_iso : S G unit ≃ Σ k, ζₛ k :=
+def zeta_iso : S G 1 ≃ Σ k, ζₛ k :=
 fins_iso ⋆ iso.sigma_swap
 end SG
 
 namespace FG
-def fins_iso : F G unit ≃ Σ n k, fin k → fin n :=
+def fins_iso : F G 1 ≃ Σ n k, fin k → fin n :=
 S.f_iso⁻¹ ⋆ SG.fins_iso
 
 def list_iso {α} : F G α ≃ Σ n, α × list (fin n × α) :=
 S.f_iso⁻¹ ⋆ SG.list_iso
 
-def list_iso₁ : F G unit ≃ Σ n, list (fin n) :=
+def list_iso₁ : F G 1 ≃ Σ n, list (fin n) :=
 S.f_iso⁻¹ ⋆ SG.list_iso₁
 
-def zeta_iso : F G unit ≃ Σ k, ζₛ k :=
+def zeta_iso : F G 1 ≃ Σ k, ζₛ k :=
 S.f_iso⁻¹ ⋆ SG.zeta_iso
 end FG
 
@@ -1032,12 +1042,12 @@ def igf (c : ℕ → ℕ) (α) :=
 
 namespace linear
 -- c = a + b c ⇒ c = a / (1 - b)
--- yet `linear` is false because that would imply `unit ≃ empty`
+-- yet `linear` is false because that would imply `1 ≃ 0`
 -- 1 = 0 + 1×1 ⇒ 1 = 0 / (1 - 1) = 0, _|_
 variable linear : Π {α β γ : Type}, (γ ≃ α ⊕ β × γ) → (γ ≃ α × list β)
 
-def wat : unit ≃ empty :=
-linear (iso.unit_mul_left ⋆ iso.empty_add_left) ⋆ iso.empty_mul_left⁻¹
+def wat : 1 ≃ 0 :=
+linear (iso.one_mul_left ⋆ iso.zero_add_left) ⋆ iso.zero_mul_left⁻¹
 end linear
 
 -- Adjoint functors
