@@ -608,6 +608,10 @@ namespace id
 def ogf_iso {α} : α ≃ ogf (delta 1) α :=
 fseq.id_iso⁻¹ ⋆ fseq.ogf_iso
 
+-- x = 0 + 1 x
+def linear {α} : α ≃ 0 ⊕ 1 × α :=
+iso.one_mul_left ⋆ iso.zero_add_left
+
 -- x = x¹
 def one_iso {α} : α ≃ 1 → α :=
 ⟨λ x y, x,
@@ -803,6 +807,11 @@ begin
   apply iso.zero_add_right.inv
 end
 end list_zero
+
+namespace nats
+def def_iso : ℕ → ℕ ≃ (unit → ℕ) × (ℕ → ℕ) :=
+iso.func_left nat.def_iso ⋆ iso.mul_func₁⁻¹
+end nats
 
 -- Balanced Trees[4,5,6]
 -- [4] https://github.com/skaslev/papers/blob/master/iterating.pdf
@@ -1044,15 +1053,22 @@ def isec (α) := quot (icyclic α)
 def igf (c : ℕ → ℕ) (α) :=
 Σ n:ℕ, fin (c n) × isec α
 
-namespace linear
+namespace bad₁
 -- c = a + b c ⇒ c = a / (1 - b)
 -- yet `linear` is false because that would imply `1 ≃ 0`
 -- 1 = 0 + 1×1 ⇒ 1 = 0 / (1 - 1) = 0, _|_
 variable linear : Π {α β γ : Type}, (γ ≃ α ⊕ β × γ) → (γ ≃ α × list β)
 
 def wat : 1 ≃ 0 :=
-linear (iso.one_mul_left ⋆ iso.zero_add_left) ⋆ iso.zero_mul_left⁻¹
-end linear
+linear id.linear ⋆ iso.zero_mul_left⁻¹
+end bad₁
+
+namespace bad₂
+variable linear : Π {α β γ : Type}, (γ ≃ α ⊕ β × γ) → (γ ≃ α ⊕ β × list β)
+
+def wat {α} : α ≃ ℕ :=
+linear id.linear ⋆ iso.zero_add_left⁻¹ ⋆ iso.one_mul_left⁻¹ ⋆ list.nat_iso
+end bad₂
 
 -- Adjoint functors
 -- bᶠ⁽ᵃ⁾ = g(b)ᵃ
