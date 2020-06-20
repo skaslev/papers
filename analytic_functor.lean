@@ -910,6 +910,10 @@ end
 -- g(x) = Σ k:ℕ, xᵏ⁺¹
 def ogf_iso {α} : G α ≃ ogf cf α :=
 eq.mp (by rw cf_lemma) (list_iso ⋆ iso.mul id.ogf_iso list.ogf_iso ⋆ ogf.mul_iso)
+
+-- g(1) = ℕ
+def nat_iso : G 1 ≃ ℕ :=
+list_iso ⋆ iso.mul_one_left⁻¹ ⋆ list.nat_iso
 end G
 
 namespace Gⁿ
@@ -981,7 +985,7 @@ begin
   apply (list_iso ⋆ iso.mul_right list.geom_iso ⋆ _),
   apply (_ ⋆ ax₁.inv),
   rw cf_lemma₁,
-  apply (_ ⋆ iso.add_zero_right ⋆ iso.add_comm ⋆ iso.add_left (iso.mul_zero_left ⋆ iso.mul_left fin.zero_iso.inv)),
+  apply (_ ⋆ iso.add_zero_left ⋆ iso.add_left (iso.mul_zero_left ⋆ iso.mul_left fin.zero_iso.inv)),
   apply (ax₂.inv ⋆ _),
   apply iso.sigma_subst (λ k, _),
   apply (_ ⋆ iso.mul_assoc ⋆ iso.mul_comm ⋆ iso.mul_right fseq.cons_iso),
@@ -1054,9 +1058,9 @@ def igf (c : ℕ → ℕ) (α) :=
 Σ n:ℕ, fin (c n) × isec α
 
 namespace bad₁
--- c = a + b c ⇒ c = a / (1 - b)
+-- c = a + bc  ⇒  c - bc = a  ⇒  c(1-b) = a  ⇒  c = a/(1-b)
 -- yet `linear` is false because that would imply `1 ≃ 0`
--- 1 = 0 + 1×1 ⇒ 1 = 0 / (1 - 1) = 0, _|_
+-- 1 = 0 + 1×1 ⇒ 1 = 0 × list(1) = 0, _|_
 variable linear : Π {α β γ : Type}, (γ ≃ α ⊕ β × γ) → (γ ≃ α × list β)
 
 def wat : 1 ≃ 0 :=
@@ -1064,6 +1068,8 @@ linear id.linear ⋆ iso.mul_zero_left⁻¹
 end bad₁
 
 namespace bad₂
+-- this version of linear is also false since it implies `1 ≃ ℕ`
+-- 1 = 0 + 1×1 ⇒ 1 = 0 + 1×list(1) = ℕ, _|_
 variable linear : Π {α β γ : Type}, (γ ≃ α ⊕ β × γ) → (γ ≃ α ⊕ β × list β)
 
 def wat {α} : α ≃ ℕ :=
