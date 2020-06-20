@@ -330,6 +330,13 @@ add_left mul_one_right ⋆ distr_left⁻¹
 
 def distr_one_right {α β} : α ⊕ β × α ≃ (1 ⊕ β) × α :=
 add_right mul_comm ⋆ distr_one_left ⋆ mul_comm
+
+def iter_iso {f : Type → Type} [functor f] [is_lawful_functor f] {α} (i : α ≃ f α) (n) : α ≃ iter f n α :=
+begin
+  induction n with n ih generalizing α,
+  { exact iso.id_iso },
+  { exact (i ⋆ ih (iso.map i)) }
+end
 end iso
 
 def lt_one {n : ℕ} (g : n < 1) : n = 0 :=
@@ -395,9 +402,9 @@ def partial_sum (f : ℕ → ℕ) : ℕ → ℕ
 | 0 := f 0
 | (n+1) := partial_sum n + f (n+1)
 
-def take {α} (c : ℕ → α) : ℕ → list α
-| 0 := []
-| (n+1) := take n ++ [c n]
+def take {α} : ℕ → (ℕ → α) → list α
+| 0 c := []
+| (n+1) c := take n c ++ [c n]
 
 namespace fin
 @[simp]
@@ -685,6 +692,20 @@ def ogf_iso : ℕ ≃ ogf (K 1) 1 :=
 iso.sigma_one⁻¹ ⋆ iso.sigma_subst (λ n, iso.mul_one_left ⋆ (iso.mul fin.one_iso fseq.one_iso₂)⁻¹)
 end nat
 
+namespace nats
+def def_iso : ℕ → ℕ ≃ ℕ × (ℕ → ℕ) :=
+iso.func_left nat.def_iso ⋆ iso.mul_func₁⁻¹ ⋆ iso.mul_left id.one_iso⁻¹
+
+def fseq_iso {n} : ℕ → ℕ ≃ fseq n ℕ × (ℕ → ℕ) :=
+begin
+  induction n with n ih,
+  { exact (iso.mul_one_left ⋆ iso.mul_left fseq.one_iso.inv) },
+  apply (_ ⋆ iso.mul_assoc ⋆ iso.mul_left fseq.cons_iso),
+  apply (_ ⋆ iso.mul_right ih),
+  apply def_iso
+end
+end nats
+
 -- Geometric power series
 -- geom(x) = Σ n:ℕ, xⁿ
 def geom (α) := Σ n, fseq n α
@@ -812,11 +833,6 @@ begin
   apply iso.add_zero_right.inv
 end
 end list_zero
-
-namespace nats
-def def_iso : ℕ → ℕ ≃ (unit → ℕ) × (ℕ → ℕ) :=
-iso.func_left nat.def_iso ⋆ iso.mul_func₁⁻¹
-end nats
 
 -- Balanced Trees[4,5,6]
 -- [4] https://github.com/skaslev/papers/blob/master/iterating.pdf
