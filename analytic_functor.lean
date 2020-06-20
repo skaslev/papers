@@ -15,6 +15,11 @@ structure {u v} iso (α : Sort u) (β : Sort v) :=
 
 notation a ` ≃ ` b := iso a b
 
+structure {u v} emb (α : Sort u) (β : Sort v) :=
+(f : α → β) (g : β → α) (gf : Π x, g (f x) = x)
+
+notation a ` ≲ ` b := emb a b
+
 def isomorphic (α β) := ∃ i : α ≃ β, true
 def skeleton := quot isomorphic
 
