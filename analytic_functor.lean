@@ -4,6 +4,8 @@
 -- [1] https://aofa.cs.princeton.edu/home
 -- [2] http://algo.inria.fr/flajolet/Publications/book.pdf
 
+import system.io
+
 def ℕ₁ := Σ' n:ℕ, n > 0
 
 def iter {α} (g : α → α) : ℕ → α → α
@@ -405,6 +407,9 @@ def partial_sum (f : ℕ → ℕ) : ℕ → ℕ
 def take {α} : ℕ → (ℕ → α) → list α
 | 0 c := []
 | (n+1) c := take n c ++ [c n]
+
+def to_list (c : ℕ → ℕ) (l r : ℕ) : list ℕ :=
+list.drop l $ take r c
 
 namespace fin
 @[simp]
@@ -1105,3 +1110,62 @@ namespace adj
 def curry (α : Type) {β γ} : adj (λ x, x × α) (λ x, α → x) β γ :=
 iso.curry⁻¹
 end adj
+
+class sampler (α : Type) :=
+(gen : io α)
+
+def gen (α) [sampler α] := sampler.gen α
+
+instance : functor sampler :=
+{map := λ α β f s, ⟨do x <- @gen α s, return $ f x⟩}
+
+instance {n} : sampler (fin n) :=
+{gen := do
+  i <- io.rand 0 (n-1),
+  dite (i < n)
+    (λ h, return ⟨i, h⟩)
+    (λ h, failure)}
+
+def gen_fseq {α} [sampler α] : Π n, io (fseq n α)
+| 0 := return fin.elim0
+| (n+1) := do
+  x <- gen α,
+  xs <- gen_fseq n,
+  return $ fseq.cons_iso.f (x, xs)
+
+instance {n α} [sampler α] : sampler (fseq n α) :=
+{gen := gen_fseq n}
+
+instance : sampler bool :=
+{gen := do
+  x <- io.rand 0 1,
+  return $ x ≠ 0}
+
+namespace sample
+def sized_ogf {c α} [sampler α] (size : ℕ) : sampler (ogf c α) :=
+{gen := do
+  shape <- gen (fin (c size)),
+  data <- gen (fseq size α),
+  return ⟨size, (shape, data)⟩}
+
+def sized_ogf_iso {f : Type → Type} {c α} [sampler α] (i : f α ≃ ogf c α) (size : ℕ) : sampler (f α) :=
+i.g <$> sized_ogf size
+
+-- TODO: Use binary search instead
+def search (c : ℕ → ℕ) (x : ℕ) (l r : ℕ) : ℕ :=
+let rs := list.zip (to_list c l r) (to_list c (l+1) (r+1)) in
+let i := @list.find_index (ℕ×ℕ) (λ y, y.1 ≤ x ∧ x ≤ y.2) _ rs in
+l + i
+
+-- TODO: Optimize, currently O(max_size²) but can be O(max_size) preprocess and O(log(max_size)) gen complexity
+def gen_ogf {c α} [sampler α] (max_size : ℕ) : sampler (ogf c α) :=
+let ps := partial_sum c in
+let num_shapes := ps max_size in
+{gen := do
+  shape <- gen (fin num_shapes),
+  let size := search ps shape.1 0 max_size in
+  (sized_ogf size).gen}
+
+def gen_ogf_iso {f : Type → Type} {c α} [sampler α] (i : f α ≃ ogf c α) (max_size : ℕ): sampler (f α) :=
+i.g <$> gen_ogf max_size
+end sample
