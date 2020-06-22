@@ -31,7 +31,7 @@ def factor {n} (p : perm n) := quot (orbit p)
 def kcycles (k n) := Σ p : perm n, factor p ≃ fin k
 def cyc (n : ℕ₁) := Σ' p : perm n.1, ∀ i, p.1 i = p.1 ⟨0, n.2⟩ + i
 
--- fseq n x = xⁿ
+-- fseq(n,x) = xⁿ
 def fseq (n : ℕ) (α : Type) := fin n → α
 
 def ordered (n α) (a b : fseq n α) := a = b
@@ -39,26 +39,26 @@ def unordered (n α) (a b : fseq n α) := ∃ p : perm n, (a ∘ p.1) = b
 def cyclic (n : ℕ₁) (α) (a b : fseq n.1 α) := ∃ p : cyc n, (a ∘ p.1.1) = b
 def kcyclic (k n : ℕ₁) (α) (a b : fseq n.1 α) := ∃ p : kcycles k.1 n.1, (a ∘ p.1.1) = b
 
--- fset n x = xⁿ / n!
+-- fset(n,x) = xⁿ / n!
 def fset (n α) := quot (unordered n α)
 
--- fsec n x = xⁿ / n
+-- fsec(n,x) = xⁿ / n
 def fsec (n α) := quot (cyclic n α)
 
--- ogf c x = Σ n:ℕ, cₙ xⁿ
+-- ogf(c,x) = Σ n:ℕ, cₙ xⁿ
 def ogf (c : ℕ → ℕ) (α) :=
 Σ n:ℕ, fin (c n) × fseq n α
 
--- egf c x = Σ n:ℕ, cₙ xⁿ / n!
+-- egf(c,x) = Σ n:ℕ, cₙ xⁿ / n!
 def egf (c : ℕ → ℕ) (α) :=
 Σ n:ℕ, fin (c n) × fset n α
 
--- lgf c x = Σ n:ℕ₁, cₙ xⁿ / n
+-- lgf(c,x) = Σ n:ℕ₁, cₙ xⁿ / n
 def lgf (c : ℕ₁ → ℕ) (α) :=
 Σ n:ℕ₁, fin (c n) × fsec n α
 
 -- TODO: Dirichlet generating function
--- dgf k c x = Σ n:ℕ₁, cₙ xⁿ / nᵏ
+-- dgf(k,c,x) = Σ n:ℕ₁, cₙ xⁿ / nᵏ
 --
 -- def dirichlet (k n : ℕ₁) (α) (a b : fseq n.1 α) :=
 -- ∃ p : ???, (a ∘ p.1.1) = b
@@ -71,18 +71,18 @@ def rel (α) := α → α → Prop
 -- This is definition 1.2 from [3] but the relation r doesn't depend
 -- on the index i, only on its size s(i)
 -- [3] https://www.ms.u-tokyo.ac.jp/~ryu/papers/taa.ps
--- af r s x = Σ i:I, x^s(i) / r(s(i))
+-- af(r,s,x) = Σ i:I, x^s(i) / r(s(i))
 def af (r : Π n α, rel (fseq n α)) (I) (s : I → ℕ) (α) :=
 Σ i:I, quot (r (s i) α)
 
 def shape {N} (c : N → ℕ) := Σ n, fin (c n)
 def size {N c} (x : @shape N c) := x.1
 
--- ogf c ↪ af ordered (shape c) size
+-- ogf(c) ↪ af(ordered, shape(c), size)
 def lift_ogf {c α} (x : ogf c α) : af ordered (shape c) size α :=
 ⟨⟨x.1, x.2.1⟩, quot.mk _ x.2.2⟩
 
--- egf c ↪ af unordered (shape c) size
+-- egf(c) ↪ af(unordered, shape(c), size)
 def lift_egf {c α} (x : egf c α) : af unordered (shape c) size α :=
 ⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
@@ -103,7 +103,7 @@ def ext_relω (r : Π n α, rel (fseq n α)) (q : Π α, rel (iseq α)) : Π n �
 | (ℕω.fin n) := r n
 | ℕω.inf := q
 
--- af r I s ↪ afω (ext_relω r q) I (ℕω.fin ∘ s)
+-- af(r,I,s) ↪ afω(ext_relω(r,q), I, ℕω.fin ∘ s)
 def lift_af {r I s α} (q : Π α, rel (iseq α)) (x : af r I s α) : afω (ext_relω r q) I (ℕω.fin ∘ s) α :=
 x
 
@@ -116,7 +116,7 @@ def ext_rel₁ (r : Π (n:ℕ₁) α, rel (fseq n.1 α)) : Π n α, rel (fseq n 
 
 def ext_s₁ {I} (s : I → ℕ₁) (i : I) : ℕ := (s i).1
 
--- af₁ r I s ↪ af (ext_rel₁ r) I (ext_s₁ s)
+-- af₁(r,I,s) ↪ af(ext_rel₁(r), I, ext_s₁(s))
 def lift_af₁ {r I s α} (x : af₁ r I s α) : af (ext_rel₁ r) I (ext_s₁ s) α :=
 ⟨x.1, eq.mp begin
   dsimp [ext_s₁],
@@ -126,7 +126,7 @@ def lift_af₁ {r I s α} (x : af₁ r I s α) : af (ext_rel₁ r) I (ext_s₁ s
   { simp [ext_rel₁] }
 end x.2⟩
 
--- lgf c ↪ af₁ cyclic (shape c) size
+-- lgf(c) ↪ af₁(cyclic, shape(c), size)
 def lift_lgf {c α} (x : lgf c α) : af₁ cyclic (shape c) size α :=
 ⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
@@ -534,6 +534,7 @@ iso.mul_func₁ ⋆ iso.func_left fin.add_iso
 def cons_iso {n α} : α × fseq n α ≃ fseq (n+1) α :=
 iso.mul_left id_iso⁻¹ ⋆ eq.mp (by rw nat.add_comm) (mul_iso 1 n α)
 
+-- xᵏ = Σ n:ℕ, δ(k,n) xⁿ
 def ogf_iso {k α} : fseq k α ≃ ogf (delta k) α :=
 ⟨λ x, ⟨k, (⟨0, by simp [delta, nat.zero_lt_succ]⟩, x)⟩,
  λ x, dite (x.1=k) (λ h, eq.mp (by rw h) x.2.2) (λ h, fin.elim0 (eq.mp (by simp [delta, if_neg h]) x.2.1)),
@@ -592,7 +593,7 @@ def cmul (a b : ℕ → ℕ) (n : ℕ) := partial_sum (λ k, a k * b (n - k)) n
 def add_iso {a b α} : ogf a α ⊕ ogf b α ≃ ogf (cadd a b) α :=
 iso.sigma_add ⋆ iso.sigma_subst (λ n, iso.distr_right⁻¹ ⋆ iso.mul_left fin.add_iso)
 
--- Σ n, cₙ xⁿ = c₀ + x Σ n, cₙ₊₁ xⁿ
+-- Σ n:ℕ, cₙ xⁿ = c₀ + x Σ n:ℕ, cₙ₊₁ xⁿ
 def foo_iso {c : ℕ → ℕ} {α} : (Σ n, fin (c n) × fseq n α) ≃ fin (c 0) ⊕ α × Σ n, fin (c (n+1)) × fseq n α :=
 begin
   apply (ax₁ ⋆ _),
@@ -611,17 +612,21 @@ sorry
 end ogf
 
 namespace zero
+-- 0 = Σ n:ℕ, cₙ xⁿ
+-- cₙ = {0, 0, 0, 0, 0, ...}
 def ogf_iso {α} : 0 ≃ ogf (K 0) α :=
 ⟨λ x, pempty.rec _ x, λ x, fin.elim0 x.2.1,
  λ x, pempty.rec _ x, λ x, fin.elim0 x.2.1⟩
 end zero
 
 namespace one
+-- 1 = Σ n:ℕ, δ(0,n) xⁿ
 def ogf_iso {α} : 1 ≃ ogf (delta 0) α :=
 fseq.one_iso⁻¹ ⋆ fseq.ogf_iso
 end one
 
 namespace id
+-- x = Σ n:ℕ, δ(1,n) xⁿ
 def ogf_iso {α} : α ≃ ogf (delta 1) α :=
 fseq.id_iso⁻¹ ⋆ fseq.ogf_iso
 
@@ -637,10 +642,11 @@ def one_iso {α} : α ≃ 1 → α :=
  λ x, funext (λ y, punit.rec rfl y)⟩
 end id
 
+-- sq(x) = x²
 def sq (α) := α × α
 
 namespace sq
--- sq x = x²
+-- sq(x) = x²
 def fseq_iso {α} : sq α ≃ fseq 2 α :=
 begin
   apply (_ ⋆ iso.func_left fin.two_iso.inv),
@@ -648,12 +654,13 @@ begin
   apply iso.mul id.one_iso id.one_iso
 end
 
+-- x² = Σ n:ℕ, δ(2,n) xⁿ
 def ogf_iso {α} : sq α ≃ ogf (delta 2) α :=
 fseq_iso ⋆ fseq.ogf_iso
 end sq
 
 namespace option
--- option x = 1 + x
+-- option(x) = 1 + x
 def def_iso {α} : option α ≃ 1 ⊕ α :=
 ⟨λ x, option.rec (sum.inl ()) sum.inr x,
  λ x, sum.rec (λ _, option.none) option.some x,
@@ -668,6 +675,8 @@ begin
   simp [cf, if_neg h]
 end
 
+-- option(x) = Σ n:ℕ, cₙ xⁿ
+-- where cₙ = {1, 1, 0, 0, 0, ...}
 def ogf_iso {α} : option α ≃ ogf cf α :=
 begin
   apply (def_iso ⋆ _),
@@ -698,9 +707,11 @@ iso.sigma_one⁻¹ ⋆ iso.sigma_subst (λ n, iso.mul_one_left ⋆ (iso.mul fin.
 end nat
 
 namespace nats
+-- ω^ω = ω ω^ω
 def def_iso : ℕ → ℕ ≃ ℕ × (ℕ → ℕ) :=
 iso.func_left nat.def_iso ⋆ iso.mul_func₁⁻¹ ⋆ iso.mul_left id.one_iso⁻¹
 
+-- ω^ω = ωⁿ ω^ω
 def fseq_iso {n} : ℕ → ℕ ≃ fseq n ℕ × (ℕ → ℕ) :=
 begin
   induction n with n ih,
@@ -748,6 +759,7 @@ def def_iso₂ {n α} : vec α (n+1) ≃ α × (vec α n) :=
  end,
  λ x, by simp [def_iso₂._match_1]⟩
 
+-- vec(x,n) = xⁿ
 def fseq_iso {n α} : vec α n ≃ fseq n α :=
 begin
   induction n with n ih,
@@ -758,9 +770,11 @@ begin
   apply ih
 end
 
+-- Σ n:ℕ, vec(x,n) = Σ n:ℕ, xⁿ
 def geom_iso {α} : (Σ n, vec α n) ≃ geom α :=
 iso.sigma_subst (λ n, fseq_iso)
 
+-- vec(x,n) = Σ k:ℕ, δ(n,k) xᵏ
 def ogf_iso {n α} : vec α n ≃ ogf (delta n) α :=
 fseq_iso ⋆ fseq.ogf_iso
 
@@ -776,6 +790,7 @@ def def_iso {α} : list α ≃ 1 ⊕ α × (list α) :=
  λ x, by induction x; repeat { simp },
  λ x, by induction x; { induction x, refl }; { simp }⟩
 
+-- list(x) = Σ n:ℕ, vec(x,n)
 def vec_iso {α} : list α ≃ Σ n, vec α n :=
 ⟨λ x, list.rec ⟨0, vec.nil α⟩ (λ h t ih, ⟨ih.1+1, vec.cons h ih.2⟩) x,
  λ x, vec.rec [] (λ n h t ih, h :: ih) x.2,
@@ -785,7 +800,8 @@ def vec_iso {α} : list α ≃ Σ n, vec α n :=
 def geom_iso {α} : list α ≃ geom α :=
 vec_iso ⋆ vec.geom_iso
 
--- list(x) = Σ n:ℕ, xⁿ
+-- list(x) = Σ n:ℕ, cₙ xⁿ = Σ n:ℕ, xⁿ
+-- cₙ = {1, 1, 1, 1, 1, ...}
 def ogf_iso {α} : list α ≃ ogf (K 1) α :=
 geom_iso ⋆ geom.ogf_iso
 
@@ -809,13 +825,14 @@ def zero_iso {n} : fin (n + 1) → fin 0 ≃ 0 :=
  λ x, funext (λ y, fin.elim0 (x y)),
  λ x, pempty.rec _ x⟩
 
--- Σ k, nᵏ = 1/(1-n)
+-- Σ k:ℕ, nᵏ = 1/(1-n)
 def list_iso {n} : (Σ k, fin k → fin n) ≃ list (fin n) :=
 list.geom_iso⁻¹
 
 def cf (n k : ℕ) := n^k
 
--- Σ k, nᵏ = ogf (λ k, nᵏ) 1
+-- Σ k:ℕ, nᵏ = Σ k:ℕ, cₖ 1ᵏ
+-- cₖ = {1, n, n², n³, n⁴, ...}
 def ogf_iso {n} : (Σ k, fin k → fin n) ≃ ogf (cf n) 1 :=
 iso.sigma_subst (λ k, iso.mul_one_right ⋆ iso.mul fin.pow_iso fseq.one_iso₂⁻¹)
 end fins
@@ -880,7 +897,7 @@ begin
   { dsimp [diter], rw ih }
 end
 
--- s(x) = f(x)
+-- s(g,x) = f(g,x)
 def f_iso {g α} : S g α ≃ F g α :=
 ⟨code, deco, deco_code, code_deco⟩
 end S
@@ -933,7 +950,8 @@ begin
     rw if_neg h₁ }
 end
 
--- g(x) = Σ k:ℕ, xᵏ⁺¹
+-- g(x) = Σ n:ℕ, xⁿ⁺¹ = Σ n:ℕ, cₙ xⁿ
+-- cₙ = {0, 1, 1, 1, 1, 1, ...}
 def ogf_iso {α} : G α ≃ ogf cf α :=
 eq.mp (by rw cf_lemma) (list_iso ⋆ iso.mul id.ogf_iso list.ogf_iso ⋆ ogf.mul_iso)
 
@@ -1005,7 +1023,8 @@ by simp [cf]
 def cf_lemma₂ (n k : ℕ) : cf n (k+1) = n^k :=
 by simp [cf, if_neg (nat.succ_ne_zero k)]
 
--- gⁿ(x) = Σ k:ℕ, nᵏ xᵏ⁺¹
+-- gⁿ(x) = Σ k:ℕ, nᵏ xᵏ⁺¹ = Σ k:ℕ, cₙ xⁿ
+-- cₙ = {0, 1, n, n², n³, ..., nᵏ⁻¹, ...}
 def ogf_iso {n α} : iter G n α ≃ ogf (cf n) α :=
 begin
   apply (list_iso ⋆ iso.mul_right list.geom_iso ⋆ _),
@@ -1032,33 +1051,37 @@ end Gⁿ
 def ζₛ (k : ℕ) := Σ n, fin k → fin n
 
 namespace SG
--- S G 1 = Σ n k:ℕ, nᵏ
+-- s(g,1) = Σ n k:ℕ, nᵏ
 def fins_iso : S G 1 ≃ Σ n k, fin k → fin n :=
 iso.sigma_subst (λ n, Gⁿ.fins_iso)
 
--- S G x = Σ n:ℕ, x/(1-nx)
+-- s(g,x) = Σ n:ℕ, x/(1-nx)
 def list_iso {α} : S G α ≃ Σ n, α × list (fin n × α) :=
 iso.sigma_subst (λ n, Gⁿ.list_iso)
 
--- S G 1 = Σ n:ℕ, 1/(1-n)
+-- s(g,1) = Σ n:ℕ, 1/(1-n)
 def list_iso₁ : S G 1 ≃ Σ n, list (fin n) :=
 fins_iso ⋆ iso.sigma_subst (λ n, fins.list_iso)
 
--- S G 1 = Σ k:ℕ, ζₛ(k)
+-- s(g,1) = Σ k:ℕ, ζₛ(k)
 def zeta_iso : S G 1 ≃ Σ k, ζₛ k :=
 fins_iso ⋆ iso.sigma_swap
 end SG
 
 namespace FG
+-- f(g,1) = Σ n:ℕ, Σ k:ℕ, nᵏ
 def fins_iso : F G 1 ≃ Σ n k, fin k → fin n :=
 S.f_iso⁻¹ ⋆ SG.fins_iso
 
+-- f(g,x) = Σ n:ℕ, x list(nx)
 def list_iso {α} : F G α ≃ Σ n, α × list (fin n × α) :=
 S.f_iso⁻¹ ⋆ SG.list_iso
 
+-- f(g,1) = Σ n:ℕ, list(n)
 def list_iso₁ : F G 1 ≃ Σ n, list (fin n) :=
 S.f_iso⁻¹ ⋆ SG.list_iso₁
 
+-- f(g,1) = Σ k:ℕ, ζₛ(k)
 def zeta_iso : F G 1 ≃ Σ k, ζₛ k :=
 S.f_iso⁻¹ ⋆ SG.zeta_iso
 end FG
@@ -1066,7 +1089,7 @@ end FG
 -- From Generatingfunctionology[7] pg. 18
 -- B₀(x) = 1, ∀ k>0:
 -- Bₖ(x) = x Bₖ₋₁(x) + k x Bₖ(x)
--- ⇒ Bₖ x = x/(1-kx) Bₖ₋₁(x)
+-- ⇒ Bₖ(x) = x/(1-kx) Bₖ₋₁(x)
 -- [7] https://www.math.upenn.edu/~wilf/gfologyLinked2.pdf
 inductive B (α : Type) : ℕ → Type
 | B₀ : B 0
@@ -1079,7 +1102,7 @@ def ogf_fixed (f : ℕ → ℕ) := Σ α, α ≃ ogf f α
 def icyc := Σ' p : ℕ → ℕ, ∀ i, p i = p 0 + i
 def icyclic (α) (a b : iseq α) := ∃ p : icyc, (a ∘ p.1) = b
 def isec (α) := quot (icyclic α)
--- igf c x = Σ n:ℕ, cₙ x^ℕ / ℕ
+-- igf(c,x) = Σ n:ℕ, cₙ x^ℕ / ℕ
 def igf (c : ℕ → ℕ) (α) :=
 Σ n:ℕ, fin (c n) × isec α
 
