@@ -590,7 +590,7 @@ nat.rec_on n
     repr y.1 ++ (ite (n=0) "" (", " ++ ih y.2)))
 
 instance {n α} [has_repr α] : has_repr (fseq n α) :=
-⟨λ x, "{" ++ fseq_repr x ++ "}"⟩
+{repr := λ x, "{" ++ fseq_repr x ++ "}"}
 end fseq
 
 namespace af
@@ -643,11 +643,11 @@ end
 def mul_iso {a b α} : ogf a α × ogf b α ≃ ogf (cmul a b) α :=
 sorry
 
-def ogf_repr {c α} [has_repr α] (x : ogf c α) : string :=
-"⟨" ++ repr x.1 ++ ", (" ++ repr x.2.1 ++ ", " ++ repr x.2.2 ++ ")"
+def shape_iso {c} : ogf c 1 ≃ shape c :=
+iso.sigma_subst (λ n, iso.mul_right fseq.one_iso₂ ⋆ iso.mul_one_right⁻¹)
 
 instance {c α} [has_repr α] : has_repr (ogf c α) :=
-⟨ogf_repr⟩
+{repr := λ x, "⟨" ++ repr x.1 ++ ", " ++ repr x.2 ++ "⟩"}
 end ogf
 
 namespace zero
