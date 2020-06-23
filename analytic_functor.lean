@@ -558,6 +558,16 @@ def ogf_iso {k α} : fseq k α ≃ ogf (delta k) α :=
   { simp [delta, h] at c,
     exact fin.elim0 c }
  end⟩
+
+def fseq_repr {n α} [has_repr α] : fseq n α → string :=
+nat.rec_on n
+  (λ x, "")
+  (λ n ih x,
+    let y := fseq.cons_iso.g x in
+    repr y.1 ++ (ite (n=0) "" (", " ++ ih y.2)))
+
+instance {n α} [has_repr α] : has_repr (fseq n α) :=
+⟨λ x, "{" ++ fseq_repr x ++ "}"⟩
 end fseq
 
 namespace af
@@ -609,6 +619,12 @@ end
 
 def mul_iso {a b α} : ogf a α × ogf b α ≃ ogf (cmul a b) α :=
 sorry
+
+def ogf_repr {c α} [has_repr α] (x : ogf c α) : string :=
+"⟨" ++ repr x.1 ++ ", (" ++ repr x.2.1 ++ ", " ++ repr x.2.2 ++ ")"
+
+instance {c α} [has_repr α] : has_repr (ogf c α) :=
+⟨ogf_repr⟩
 end ogf
 
 namespace zero
@@ -1117,7 +1133,7 @@ linear id.linear ⋆ iso.mul_zero_left⁻¹
 end bad₁
 
 namespace bad₂
--- this version of linear is also false since it implies `1 ≃ ℕ`
+-- this is also false since it implies `1 ≃ ℕ`
 -- 1 = 0 + 1×1 ⇒ 1 = 0 + 1×list(1) = ℕ, _|_
 variable linear : Π {α β γ : Type}, (γ ≃ α ⊕ β × γ) → (γ ≃ α ⊕ β × list β)
 
@@ -1144,7 +1160,7 @@ instance : functor sampler :=
 
 instance {n} : sampler (fin n) :=
 {gen := do
-  i <- io.rand 0 (n-1),
+  i <- io.rand 0 n,
   dite (i < n)
     (λ h, return ⟨i, h⟩)
     (λ h, failure)}
@@ -1159,9 +1175,15 @@ def gen_fseq {α} [sampler α] : Π n, io (fseq n α)
 instance {n α} [sampler α] : sampler (fseq n α) :=
 {gen := gen_fseq n}
 
+instance zero_sampler : sampler 0 :=
+{gen:=failure}
+
+instance one_sampler : sampler 1 :=
+{gen:=return ()}
+
 instance : sampler bool :=
 {gen := do
-  x <- io.rand 0 1,
+  x <- io.rand 0 2,
   return $ x ≠ 0}
 
 namespace sample
