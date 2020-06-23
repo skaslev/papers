@@ -140,16 +140,45 @@ inductive {u} pempty : Sort u
 
 @[instance]
 def {u} sort_has_zero : has_zero (Sort u) :=
-{zero:=pempty}
+{zero := pempty}
 
 @[instance]
 def {u} sort_has_one : has_one (Sort u) :=
-{one:=punit}
+{one := punit}
+
+instance : has_repr pempty :=
+{repr := λ _, "∅"}
+
+def out {α} [has_repr α] (a : io α) : io unit :=
+do
+  x <- a,
+  io.put_str_ln $ repr x
 
 def isprop (α : Type) := ∀ x y : α, x = y
 
 def isprop_one : isprop 1
 | () () := rfl
+
+def const {α β} (x : α) (y : β) := x
+
+def K (k n : ℕ) := k
+
+def C (n : ℕ) : ℕ → ℕ
+| 0 := n
+| _ := 0
+
+def delta (k n : ℕ) := ite (n = k) 1 0
+
+def partial_sum (f : ℕ → ℕ) : ℕ → ℕ
+| 0 := f 0
+| (n+1) := partial_sum n + f (n+1)
+
+def take {α} : ℕ → (ℕ → α) → list α
+| 0 c := []
+| (n+1) c := take n c ++ [c n]
+
+def to_list (c : ℕ → ℕ) (l r : ℕ) : list ℕ :=
+list.drop l $ take r c
 
 attribute [simp] function.comp
 
@@ -274,6 +303,9 @@ def sigma_one {α} : (Σ a:α, 1) ≃ α :=
  λ x, by induction x with x₁ x₂; induction x₂; refl,
  λ x, by simp⟩
 
+def sigma_subst_zero {α} {β : α → Type} (i : Π a, β a ≃ 0): (Σ a:α, β a) ≃ 0 :=
+sigma_subst i ⋆ sigma_zero
+
 def add_comm {α β} : α ⊕ β ≃ β ⊕ α :=
 ⟨λ x, sum.rec sum.inr sum.inl x,
  λ x, sum.rec sum.inr sum.inl x,
@@ -333,12 +365,18 @@ add_left mul_one_right ⋆ distr_left⁻¹
 def distr_one_right {α β} : α ⊕ β × α ≃ (1 ⊕ β) × α :=
 add_right mul_comm ⋆ distr_one_left ⋆ mul_comm
 
+def add_zero_right_subst {α β γ} (i : α ≃ β) (j : γ ≃ 0) : α ≃ β ⊕ γ :=
+i ⋆ add_zero_right ⋆ add_right j⁻¹
+
 def iter_iso {f : Type → Type} [functor f] [is_lawful_functor f] {α} (i : α ≃ f α) (n) : α ≃ iter f n α :=
 begin
   induction n with n ih generalizing α,
   { exact iso.id_iso },
   { exact (i ⋆ ih (iso.map i)) }
 end
+
+def const_iso {α β : Type} : α ≃ const α β :=
+iso.id_iso
 end iso
 
 def lt_one {n : ℕ} (g : n < 1) : n = 0 :=
@@ -395,21 +433,6 @@ def ax₁ {f : ℕ → Type} : (Σ n:ℕ, f n) ≃ f 0 ⊕ Σ n:ℕ, f (n+1) :=
 def ax₂ {f : ℕ → Type} {α} : (Σ n:ℕ, α × f n) ≃ α × Σ n:ℕ, f n :=
 iso.sigma_distr⁻¹
 end generic_summation
-
-def delta (k n : ℕ) := ite (n = k) 1 0
-
-def K (k n : ℕ) := k
-
-def partial_sum (f : ℕ → ℕ) : ℕ → ℕ
-| 0 := f 0
-| (n+1) := partial_sum n + f (n+1)
-
-def take {α} : ℕ → (ℕ → α) → list α
-| 0 c := []
-| (n+1) c := take n c ++ [c n]
-
-def to_list (c : ℕ → ℕ) (l r : ℕ) : list ℕ :=
-list.drop l $ take r c
 
 namespace fin
 @[simp]
@@ -641,6 +664,25 @@ def ogf_iso {α} : 1 ≃ ogf (delta 0) α :=
 fseq.one_iso⁻¹ ⋆ fseq.ogf_iso
 end one
 
+namespace bool
+def def_iso : bool ≃ 1 ⊕ 1 :=
+⟨λ x, bool.rec (sum.inl ()) (sum.inr ()) x,
+ λ x, sum.rec (λ x, ff) (λ x, tt) x,
+ λ x, begin induction x, repeat {simp} end,
+ λ x, begin induction x, repeat {induction x, simp} end⟩
+
+def ogf_iso : bool ≃ ogf (C 2) 1 :=
+begin
+  apply (def_iso ⋆ _),
+  apply (_ ⋆ ax₁.inv),
+  apply (_ ⋆ iso.add_left (iso.mul_one_right ⋆ iso.mul_right fseq.one_iso.inv)),
+  apply iso.add_zero_right_subst fin.two_iso.inv _,
+  apply iso.sigma_subst_zero (λ n, _),
+  apply (iso.mul_left fin.zero_iso ⋆ _),
+  apply iso.mul_zero_left.inv
+end
+end bool
+
 namespace id
 -- x = Σ n:ℕ, δ(1,n) xⁿ
 def ogf_iso {α} : α ≃ ogf (delta 1) α :=
@@ -794,6 +836,7 @@ iso.sigma_subst (λ n, fseq_iso)
 def ogf_iso {n α} : vec α n ≃ ogf (delta n) α :=
 fseq_iso ⋆ fseq.ogf_iso
 
+-- Σ n:ℕ, vec(x,n) = Σ k:ℕ, xᵏ
 def ogf_iso₁ {α} : (Σ n, vec α n) ≃ ogf (K 1) α :=
 geom_iso ⋆ geom.ogf_iso
 end vec
@@ -1154,6 +1197,7 @@ class sampler (α : Type) :=
 (gen : io α)
 
 def gen (α) [sampler α] := sampler.gen α
+def genₛ {α} (s : sampler α) := sampler.gen α
 
 instance : functor sampler :=
 {map := λ α β f s, ⟨do x <- @gen α s, return $ f x⟩}
@@ -1165,21 +1209,25 @@ instance {n} : sampler (fin n) :=
     (λ h, return ⟨i, h⟩)
     (λ h, failure)}
 
-def gen_fseq {α} [sampler α] : Π n, io (fseq n α)
-| 0 := return fin.elim0
-| (n+1) := do
-  x <- gen α,
-  xs <- gen_fseq n,
-  return $ fseq.cons_iso.f (x, xs)
+def gen_fseq (n α) [sampler α] : io (fseq n α) :=
+nat.rec_on n
+  (return fin.elim0)
+  (λ n ih, do
+    x <- gen α,
+    xs <- ih,
+    return $ fseq.cons_iso.f (x, xs))
+
+def gen_fseqₛ (n) {α} (s : sampler α) : io (fseq n α) :=
+@gen_fseq n α s
 
 instance {n α} [sampler α] : sampler (fseq n α) :=
-{gen := gen_fseq n}
+{gen := gen_fseq n α}
 
 instance zero_sampler : sampler 0 :=
-{gen:=failure}
+{gen := failure}
 
 instance one_sampler : sampler 1 :=
-{gen:=return ()}
+{gen := return ()}
 
 instance : sampler bool :=
 {gen := do
@@ -1187,30 +1235,60 @@ instance : sampler bool :=
   return $ x ≠ 0}
 
 namespace sample
-def sized_ogf {c α} [sampler α] (size : ℕ) : sampler (ogf c α) :=
+def sized_ogf (c α) [sampler α] (size : ℕ) : sampler (ogf c α) :=
 {gen := do
   shape <- gen (fin (c size)),
   data <- gen (fseq size α),
   return ⟨size, (shape, data)⟩}
 
 def sized_ogf_iso {f : Type → Type} {c α} [sampler α] (i : f α ≃ ogf c α) (size : ℕ) : sampler (f α) :=
-i.g <$> sized_ogf size
+i.g <$> sized_ogf c α size
 
--- TODO: Use binary search instead
-def search (c : ℕ → ℕ) (x : ℕ) (l r : ℕ) : ℕ :=
-let rs := list.zip (to_list c l r) (to_list c (l+1) (r+1)) in
-let i := @list.find_index (ℕ×ℕ) (λ y, y.1 ≤ x ∧ x ≤ y.2) _ rs in
-l + i
+def sized_ogf₁ (c) (size : ℕ) : sampler (ogf c 1) :=
+sized_ogf c 1 size
 
--- TODO: Optimize, currently O(max_size²) but can be O(max_size) preprocess and O(log(max_size)) gen complexity
-def gen_ogf {c α} [sampler α] (max_size : ℕ) : sampler (ogf c α) :=
+def sized_ogf_iso₁ {α c} (i : α ≃ ogf c 1) (size : ℕ) : sampler α :=
+sized_ogf_iso (iso.const_iso.inv ⋆ i) size
+
+-- TODO: Optimize, currently O(max_size²) preprocess and O(max_size) gen
+-- but can be O(max_size) preprocess and O(log(max_size)) gen complexity
+def bounded_ogf (c α) [sampler α] (max_size : ℕ) : sampler (ogf c α) :=
 let ps := partial_sum c in
 let num_shapes := ps max_size in
+let ps' := to_list ps 0 max_size in
 {gen := do
   shape <- gen (fin num_shapes),
-  let size := search ps shape.1 0 max_size in
-  (sized_ogf size).gen}
+  let size := list.find_index (λ x, shape.1 < x) ps',  -- TODO: Use binary search instead
+  (sized_ogf c α size).gen}
 
-def gen_ogf_iso {f : Type → Type} {c α} [sampler α] (i : f α ≃ ogf c α) (max_size : ℕ): sampler (f α) :=
-i.g <$> gen_ogf max_size
+def bounded_ogf_iso {f : Type → Type} {c α} [sampler α] (i : f α ≃ ogf c α) (max_size : ℕ): sampler (f α) :=
+i.g <$> bounded_ogf c α max_size
+
+def bounded_ogf₁ (c) (max_size : ℕ) : sampler (ogf c 1) :=
+bounded_ogf c 1 max_size
+
+def bounded_ogf_iso₁ {α c} (i : α ≃ ogf c 1) (max_size : ℕ) : sampler α :=
+bounded_ogf_iso (iso.const_iso.inv ⋆ i) max_size
 end sample
+
+section examples
+open sample
+
+#eval out $ gen_fseq 50 $ fin 40000
+#eval out $ gen_fseqₛ 50 $ bounded_ogf_iso₁ bool.ogf_iso 0
+
+#eval out $ gen_fseqₛ 50 $ bounded_ogf_iso (@list.ogf_iso bool) 3
+#eval out $ gen_fseqₛ 50 $ @bounded_ogf_iso _ _ _ (bounded_ogf_iso option.ogf_iso 1) (@list.ogf_iso (option bool)) 3
+
+#eval out $ gen_fseqₛ 50 $ sized_ogf_iso (@option.ogf_iso bool) 1
+#eval out $ gen_fseqₛ 50 $ bounded_ogf_iso (@option.ogf_iso bool) 1
+
+#eval out $ gen_fseqₛ 50 $ bounded_ogf (delta 2) bool 20
+#eval out $ genₛ $ bounded_ogf (K 500) bool 10
+#eval out $ genₛ $ bounded_ogf (K 500) bool 10
+#eval out $ genₛ $ bounded_ogf (K 500) bool 10
+#eval out $ gen_fseqₛ 50 $ bounded_ogf (K 500) bool 10
+
+#eval out $ genₛ $ sized_ogf (ogf.cmul (delta 10) option.cf) bool 10
+#eval out $ genₛ $ sized_ogf (ogf.cmul (delta 10) option.cf) bool 11
+end examples
