@@ -177,9 +177,6 @@ def take {α} : ℕ → (ℕ → α) → list α
 | 0 c := []
 | (n+1) c := take n c ++ [c n]
 
-def to_list (c : ℕ → ℕ) (l r : ℕ) : list ℕ :=
-list.drop l $ take r c
-
 class has_ogf (f : Type → Type) :=
 (cf : ℕ → ℕ)
 (iso {α} : f α ≃ ogf cf α)
@@ -267,8 +264,8 @@ func i id_iso
 -- α ⊕ β        a + b
 -- α × β        ab
 -- α → β        bᵃ
--- Σ n, f n     Σ n, f(n)
--- Π n, f n     Π n, f(n)
+-- Σ n, f n     Σ n, fₙ
+-- Π n, f n     Π n, fₙ
 -- α ≃ β        a = b
 
 -- (cᵇ)ᵃ = cᵃᵇ
