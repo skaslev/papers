@@ -1227,11 +1227,18 @@ end bad₂
 
 -- Adjoint functors
 -- bᶠ⁽ᵃ⁾ = g(b)ᵃ
-def adj (f g : Type → Type) (α β) := (f α → β) ≃ (α → g β)
+def adj (f g : Type → Type) := Π α β, (f α → β) ≃ (α → g β)
+
+notation f ` ⊣ ` g := adj f g
+
+-- "Every monad arises from some adjunction — in fact, typically from many adjunctions"
+
+-- The slogan is "Adjoint functors arise everywhere".
+--     — Saunders Mac Lane, Categories for the Working Mathematician
 
 namespace adj
-def curry (α : Type) {β γ} : adj (λ x, x × α) (λ x, α → x) β γ :=
-iso.curry⁻¹
+def curry (α : Type) : (λ x, x × α) ⊣ (λ x, α → x) :=
+λ β γ, iso.curry⁻¹
 end adj
 
 class sampler (α : Type) :=
@@ -1302,7 +1309,8 @@ let num_shapes := ps max_size in
 let ps' := to_list ps 0 max_size in
 {gen := do
   shape <- gen (fin num_shapes),
-  let size := list.find_index (λ x, shape.1 < x) ps',  -- TODO: Use binary search instead
+  -- TODO: ps is sorted so use binary search instead
+  let size := list.find_index (λ x, shape.1 < x) ps',
   (sized_ogf c α size).gen}
 
 def bounded_ogf_iso {f : Type → Type} {c α} [sampler α] (i : f α ≃ ogf c α) (max_size : ℕ): sampler (f α) :=
@@ -1338,20 +1346,23 @@ open sample
 #eval out $ gen_fseq 50 $ fin 40000
 #eval out $ gen_fseqₛ 50 $ bounded_ogf_iso₁ bool.ogf_iso 0
 
-#eval out $ gen_fseqₛ 50 $ bounded_ogf_iso (@list.ogf_iso bool) 3
+#eval out $ gen_fseqₛ 50 $ X.sized_ogf list bool 3
 #eval out $ gen_fseqₛ 50 $ X.bounded_ogf list bool 3
-
-#eval out $ gen_fseqₛ 50 $ @bounded_ogf_iso _ _ _ (bounded_ogf_iso option.ogf_iso 1) (@list.ogf_iso (option bool)) 3
 
 #eval out $ gen_fseqₛ 50 $ sized_ogf_iso (@option.ogf_iso bool) 1
 #eval out $ gen_fseqₛ 50 $ bounded_ogf_iso (@option.ogf_iso bool) 1
+
+#eval out $ gen_fseqₛ 50 $ @sized_ogf_iso _ _ _ (bounded_ogf_iso option.ogf_iso 1) (@list.ogf_iso (option bool)) 3
+#eval out $ gen_fseqₛ 50 $ @bounded_ogf_iso _ _ _ (bounded_ogf_iso option.ogf_iso 1) (@list.ogf_iso (option bool)) 3
 
 #eval out $ gen_fseqₛ 50 $ bounded_ogf (delta 2) bool 20
 #eval out $ genₛ $ bounded_ogf (K 500) bool 10
 #eval out $ genₛ $ bounded_ogf (K 500) bool 10
 #eval out $ genₛ $ bounded_ogf (K 500) bool 10
-#eval out $ gen_fseqₛ 50 $ bounded_ogf (K 500) bool 10
+#eval out $ gen_fseqₛ 50 $ bounded_ogf (K 2) bool 10
 
+#eval take 50 $ delta 10
+#eval take 50 $ option.cf
 #eval take 50 $ ogf.cmul (delta 10) option.cf
 #eval out $ genₛ $ sized_ogf (ogf.cmul (delta 10) option.cf) bool 10
 #eval out $ genₛ $ sized_ogf (ogf.cmul (delta 10) option.cf) bool 11
