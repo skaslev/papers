@@ -712,7 +712,7 @@ begin
 end
 
 instance : has_ogf₁ bool :=
-⟨C 2, bool.ogf_iso⟩
+⟨C 2, ogf_iso⟩
 end bool
 
 namespace id
@@ -1246,6 +1246,7 @@ notation f ` ⊣ ` g := adj f g
 --     — Saunders Mac Lane, Categories for the Working Mathematician
 
 namespace adj
+-- xa ⊣ xᵃ
 def curry (α : Type) : (λ x, x × α) ⊣ (λ x, α → x) :=
 λ β γ, iso.curry⁻¹
 end adj
