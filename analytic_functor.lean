@@ -1311,16 +1311,28 @@ sized_ogf_iso (iso.const_iso.inv ⋆ i) size
 def sized_shape (c) (size : ℕ) : sampler (shape c) :=
 ogf.shape_iso.f <$> sized_ogf₁ c size
 
--- TODO: Optimize, currently O(max_size²) preprocess and O(max_size) gen
--- but can be O(max_size) preprocess and O(log(max_size)) gen complexity
+def reverse_impl {α} : list α → list α → list α
+| acc [] := acc
+| acc (x::xs) := reverse_impl (x::acc) xs
+
+def reverse {α} : list α → list α :=
+reverse_impl []
+
+def prefix_sum_impl (c : ℕ → ℕ) : ℕ → list ℕ
+| 0 := [c 0]
+| (n+1) :=
+  let ih := prefix_sum_impl n in
+  (c (n+1) + ih.head) :: ih
+
+def prefix_sum  (c : ℕ → ℕ) (n : ℕ) : ℕ × list ℕ :=
+let ps := prefix_sum_impl c n in
+(ps.head, reverse ps)
+
 def bounded_ogf (c α) [sampler α] (max_size : ℕ) : sampler (ogf c α) :=
-let ps := partial_sum c in
-let num_shapes := ps max_size in
-let ps' := to_list ps 0 max_size in
+let (num_shapes, ps) := prefix_sum c max_size in
 {gen := do
   shape <- gen (fin num_shapes),
-  -- TODO: ps is sorted so use binary search instead
-  let size := list.find_index (λ x, shape.1 < x) ps',
+  let size := list.find_index (λ x, shape.1 < x) ps,
   (sized_ogf c α size).gen}
 
 def bounded_ogf_iso {f : Type → Type} {c α} [sampler α] (i : f α ≃ ogf c α) (max_size : ℕ): sampler (f α) :=
@@ -1358,6 +1370,9 @@ open sample
 
 #eval out $ gen_fseqₛ 50 $ X.sized_ogf list bool 3
 #eval out $ gen_fseqₛ 50 $ X.bounded_ogf list bool 3
+
+#eval out $ gen_fseqₛ 50 $ X.sized_ogf₁ nat 10
+#eval out $ gen_fseqₛ 50 $ X.bounded_ogf₁ nat 10
 
 #eval out $ gen_fseqₛ 50 $ sized_ogf_iso (@option.ogf_iso bool) 1
 #eval out $ gen_fseqₛ 50 $ bounded_ogf_iso (@option.ogf_iso bool) 1
