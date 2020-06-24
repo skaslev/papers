@@ -262,6 +262,15 @@ func id_iso i
 def func_left {α β γ} (i : α ≃ β) : α → γ ≃ β → γ :=
 func i id_iso
 
+-- Types        Algebra
+-- α            a
+-- α ⊕ β        a + b
+-- α × β        ab
+-- α → β        bᵃ
+-- Σ n, f n     Σ n, f(n)
+-- Π n, f n     Π n, f(n)
+-- α ≃ β        a = b
+
 -- (cᵇ)ᵃ = cᵃᵇ
 def curry {α β γ : Type} : α → β → γ ≃ (α × β) → γ :=
 ⟨λ f x, f x.1 x.2, λ f x y, f (x, y), by simp, by simp⟩
