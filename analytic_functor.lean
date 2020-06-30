@@ -71,7 +71,7 @@ def rel (α) := α → α → Prop
 -- This is definition 1.2 from [3] but the relation r doesn't depend
 -- on the index i, only on its size s(i)
 -- [3] https://www.ms.u-tokyo.ac.jp/~ryu/papers/taa.ps
--- af(r,s,x) = Σ i:I, x^s(i) / r(s(i))
+-- af(r,I,s,x) = Σ i:I, x^s(i) / r(s(i))
 def af (r : Π n α, rel (fseq n α)) (I) (s : I → ℕ) (α) :=
 Σ i:I, quot (r (s i) α)
 
@@ -1255,7 +1255,7 @@ def gen (α) [sampler α] := sampler.gen α
 def genₛ {α} (s : sampler α) := sampler.gen α
 
 instance : functor sampler :=
-{map := λ α β f s, ⟨do x <- @gen α s, return $ f x⟩}
+{map := λ α β f s, ⟨do x <- genₛ s, return $ f x⟩}
 
 instance {n} : sampler (fin n) :=
 {gen := do
@@ -1330,7 +1330,7 @@ let (num_shapes, ps) := prefix_sum c max_size in
 {gen := do
   shape <- gen (fin num_shapes),
   let size := list.find_index (λ x, shape.1 < x) ps,
-  (sized_ogf c α size).gen}
+  genₛ (sized_ogf c α size)}
 
 def bounded_ogf_iso {f : Type → Type} {c α} [sampler α] (i : f α ≃ ogf c α) (max_size : ℕ): sampler (f α) :=
 i.g <$> bounded_ogf c α max_size
