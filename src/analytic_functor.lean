@@ -1388,5 +1388,4 @@ open sample
 #eval take 50 $ ogf.cmul (delta 10) option.cf
 #eval out $ genₛ $ sized_ogf (ogf.cmul (delta 10) option.cf) bool 10
 #eval out $ genₛ $ sized_ogf (ogf.cmul (delta 10) option.cf) bool 11
-#eval out $ genₛ $ sized_ogf (ogf.cmul (delta 10) option.cf) bool 12
 end examples

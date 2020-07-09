@@ -1,3 +1,4 @@
+# LaTeX
 *.acn
 *.acr
 *.alg
@@ -30,3 +31,8 @@
 *.vrb
 *.xdy
 *.tdo
+
+# leanpkg
+*.olean
+/_target
+/leanpkg.path
