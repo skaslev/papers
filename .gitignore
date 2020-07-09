@@ -36,3 +36,6 @@
 *.olean
 /_target
 /leanpkg.path
+
+# Nix
+result
