@@ -38,6 +38,7 @@ def ordered (n α) (a b : fseq n α) := a = b
 def unordered (n α) (a b : fseq n α) := ∃ p : perm n, (a ∘ p.1) = b
 def cyclic (n : ℕ₁) (α) (a b : fseq n.1 α) := ∃ p : cyc n, (a ∘ p.1.1) = b
 def kcyclic (k n : ℕ₁) (α) (a b : fseq n.1 α) := ∃ p : kcycles k.1 n.1, (a ∘ p.1.1) = b
+def dirichlet (k n : ℕ₁) (α) (a b : fseq n.1 α) := ∃ p : fin k.1 → cyc n, ∀ i, (a ∘ (p i).1.1) = b
 
 -- fset(n,x) = xⁿ / n!
 def fset (n α) := quot (unordered n α)
@@ -45,10 +46,12 @@ def fset (n α) := quot (unordered n α)
 -- fsec(n,x) = xⁿ / n
 def fsec (n α) := quot (cyclic n α)
 
+-- Ordinary generating function
 -- ogf(c,x) = Σ n:ℕ, cₙ xⁿ
 def ogf (c : ℕ → ℕ) (α) :=
 Σ n:ℕ, fin (c n) × fseq n α
 
+-- Exponential generating function
 -- egf(c,x) = Σ n:ℕ, cₙ xⁿ / n!
 def egf (c : ℕ → ℕ) (α) :=
 Σ n:ℕ, fin (c n) × fset n α
@@ -57,13 +60,10 @@ def egf (c : ℕ → ℕ) (α) :=
 def lgf (c : ℕ₁ → ℕ) (α) :=
 Σ n:ℕ₁, fin (c n) × fsec n α
 
--- TODO: Dirichlet generating function
+-- Dirichlet generating function
 -- dgf(k,c,x) = Σ n:ℕ₁, cₙ xⁿ / nᵏ
---
--- def dirichlet (k n : ℕ₁) (α) (a b : fseq n.1 α) :=
--- ∃ p : ???, (a ∘ p.1.1) = b
--- def dgf (k : ℕ₁) (c : ℕ₁ → ℕ) (α) :=
--- Σ n:ℕ₁, fin (c n) × quot (dirichlet k n α)
+def dgf (k : ℕ₁) (c : ℕ₁ → ℕ) (α) :=
+Σ n:ℕ₁, fin (c n) × quot (dirichlet k n α)
 
 def rel (α) := α → α → Prop
 
@@ -130,6 +130,10 @@ end x.2⟩
 def lift_lgf {c α} (x : lgf c α) : af₁ cyclic (shape c) size α :=
 ⟨⟨x.1, x.2.1⟩, x.2.2⟩
 
+-- dgf(k,c) ↪ af₁(dirichlet(k), shape(c), size)
+def lift_dgf {k c α} (x : dgf k c α) : af₁ (dirichlet k) (shape c) size α :=
+⟨⟨x.1, x.2.1⟩, x.2.2⟩
+
 @[simp] lemma sigma.mk.eta {α} {β : α → Type} : Π {p : Σ α, β α}, sigma.mk p.1 p.2 = p
 | ⟨a, b⟩ := rfl
 
@@ -186,7 +190,7 @@ class has_ogf₁ (α : Type) :=
 (iso : α ≃ ogf cf 1)
 
 instance ogf_has_ogf₁ {f} [has_ogf f] : has_ogf₁ (f 1) :=
-⟨has_ogf.cf f, has_ogf.iso f⟩
+⟨has_ogf.cf f, @has_ogf.iso f _ _⟩
 
 attribute [simp] function.comp
 
@@ -428,8 +432,7 @@ def ax₁ {f : ℕ → Type} : (Σ n:ℕ, f n) ≃ f 0 ⊕ Σ n:ℕ, f (n+1) :=
    { rw dif_neg h,
      simp,
      split,
-     { rw nat.add_comm,
-       rw nat.sub_add_cancel,
+     { rw nat.sub_add_cancel,
        exact le_of_not_gt h },
      { apply eq_rec_heq }}
  end,
@@ -454,7 +457,7 @@ end generic_summation
 namespace fin
 @[simp]
 def mk.eta {n} (i : fin n) {h} : fin.mk i.val h = i :=
-by induction i; simp
+by induction i; refl
 
 def zero_iso : fin 0 ≃ 0 :=
 ⟨λ x, fin.elim0 x, λ x, pempty.rec _ x,
@@ -472,7 +475,7 @@ begin
   { exact h },
   { apply nat.lt_trans b_ih,
     apply nat.lt_succ_of_le,
-    exact nat.less_than_or_equal.refl (a + b_n) }
+    exact nat.less_than_or_equal.refl }
 end
 
 def bar {a b x : ℕ} (g : x < a + b) (h : ¬x < a) : x - a < b :=
@@ -482,7 +485,7 @@ begin
   { rw i,
     rw i at g,
     rw nat.sub_self,
-    have j : a + 0 < a + b := by simp; exact g,
+    have j : a + 0 < a + b := by exact g,
     exact nat.lt_of_add_lt_add_left j },
   { have j : a + (x - a) < a + b :=
     begin
@@ -508,7 +511,7 @@ def add_iso {a b} : fin a ⊕ fin b ≃ fin (a + b) :=
        induction x with x xih,
        { exact nat.lt_irrefl a h },
        { have g : a < a + (nat.succ x) := nat.lt_add_of_pos_right (nat.pos_of_ne_zero (nat.succ_ne_zero x)),
-         exact nat.nat.lt_asymm h g }
+         exact nat.lt_asymm h g }
      end,
      simp [dif_neg h, nat.add_sub_cancel_left a x] }
  end,
@@ -520,7 +523,7 @@ def add_iso {a b} : fin a ⊕ fin b ≃ fin (a + b) :=
    { rw dif_neg h,
      have i := nat.eq_or_lt_of_not_lt h,
      induction i,
-     { simp [i, nat.sub_self a] },
+     { simp [i, nat.sub_self a], refl },
      { simp [nat.add_sub_of_le (nat.le_of_lt i)] }}
  end⟩
 
@@ -577,7 +580,7 @@ iso.mul_left id_iso⁻¹ ⋆ eq.mp (by rw nat.add_comm) (mul_iso 1 n α)
 -- xᵏ = Σ n:ℕ, δ(k,n) xⁿ
 def ogf_iso {k α} : fseq k α ≃ ogf (delta k) α :=
 ⟨λ x, ⟨k, (⟨0, by simp [delta, nat.zero_lt_succ]⟩, x)⟩,
- λ x, dite (x.1=k) (λ h, eq.mp (by rw h) x.2.2) (λ h, fin.elim0 (eq.mp (by simp [delta, if_neg h]) x.2.1)),
+ λ x, dite (x.1=k) (λ h, eq.mp (by rw h) x.2.2) (λ h, begin have z : fin 0 := eq.mp (by simp [delta, if_neg h]) x.2.1, exact fin.elim0 z end),
  λ x, by simp; refl,
  λ x,
  begin
@@ -674,8 +677,14 @@ namespace zero
 -- 0 = Σ n:ℕ, cₙ xⁿ
 -- cₙ = {0, 0, 0, 0, 0, ...}
 def ogf_iso {α} : 0 ≃ ogf (K 0) α :=
-⟨λ x, pempty.rec _ x, λ x, fin.elim0 x.2.1,
- λ x, pempty.rec _ x, λ x, fin.elim0 x.2.1⟩
+⟨λ x, pempty.rec _ x, λ x, begin
+  have z : fin 0 := x.2.1,
+  apply fin.elim0 z
+end, --λ x, fin.elim0 x.2.1,
+ λ x, pempty.rec _ x, λ x, begin
+  have z : fin 0 := x.2.1,
+  apply fin.elim0 z
+ end⟩ --λ x, fin.elim0 x.2.1⟩
 
 instance : has_ogf₁ 0 :=
 ⟨K 0, ogf_iso⟩
@@ -845,9 +854,9 @@ inductive vec (α : Type) : ℕ → Type
 namespace vec
 def def_iso₁ {α} : vec α 0 ≃ 1 :=
 ⟨λ x, (),
- λ x, vec.nil α,
+ λ x, vec.nil,
  λ x, match x with
- | vec.nil α := rfl
+ | vec.nil := rfl
  end,
  λ x, begin induction x, refl end⟩
 
@@ -895,7 +904,7 @@ def def_iso {α} : list α ≃ 1 ⊕ α × (list α) :=
 
 -- list(x) = Σ n:ℕ, vec(x,n)
 def vec_iso {α} : list α ≃ Σ n, vec α n :=
-⟨λ x, list.rec ⟨0, vec.nil α⟩ (λ h t ih, ⟨ih.1+1, vec.cons h ih.2⟩) x,
+⟨λ x, list.rec ⟨0, vec.nil⟩ (λ h t ih, ⟨ih.1+1, vec.cons h ih.2⟩) x,
  λ x, vec.rec [] (λ n h t ih, h :: ih) x.2,
  λ x, begin induction x with h t ih, { refl }, simp [ih] end,
  λ x, begin induction x with x₁ x₂, induction x₂ with n h t ih, { refl }, { simp [ih], rw ih } end⟩
@@ -921,12 +930,12 @@ namespace fins
 def one_iso : fin 0 → fin 0 ≃ 1 :=
 ⟨λ x, (),
  λ x, fin.elim0,
- λ x, funext (λ y, fin.elim0 y),
+ λ x, funext fin.elim0,
  λ x, by induction x; refl⟩
 
 -- 0ⁿ⁺¹ = 0
 def zero_iso {n} : fin (n + 1) → fin 0 ≃ 0 :=
-⟨λ x, fin.elim0 (x 0),
+⟨λ x, by have z : fin 0 := x 0; exact fin.elim0 z,
  λ x, pempty.rec _ x,
  λ x, funext (λ y, fin.elim0 (x y)),
  λ x, pempty.rec _ x⟩
@@ -981,7 +990,7 @@ def diter {β : Type → Type 1} {γ : Type → Type} (g : Π {α}, β (γ α) �
 | (n+1) α := g ∘ diter n
 
 def code {g α} (x : S g α) : F g α :=
-diter (@F.F₁ g) x.1 (F.F₀ g x.2)
+diter (@F.F₁ g) x.1 (F.F₀ x.2)
 
 def deco {g α} (x : F g α) : S g α :=
 F.rec (λ α a, ⟨0, a⟩) (λ α a ih, ⟨ih.1+1, ih.2⟩) x
@@ -1042,18 +1051,19 @@ def cf_lemma : cf = ogf.cmul (delta 1) (K 1) :=
 begin
   funext n,
   by_cases n=0,
-  { simp [h, cf, delta, K, ogf.cmul, partial_sum] },
+  { simp [h, cf, delta, K, ogf.cmul, partial_sum, if_neg nat.zero_ne_one], refl },
   simp [h, cf, delta, K, ogf.cmul, partial_sum],
   induction n with n ih,
   { exact false.elim (h rfl) },
   simp [partial_sum],
   by_cases n=0,
   { rename h g,
-    simp [g, partial_sum] },
+    simp [g, partial_sum, if_neg nat.zero_ne_one], refl},
   { rename h g,
     rw ←ih g,
-    have h₁ : ¬n+1=1 := λ x, false.elim (g (add_right_cancel x)),
-    rw if_neg h₁ }
+    have h₁ : ¬n+1=1 := λ x, false.elim (g (nat.add_right_cancel x)),
+    rw if_neg h₁,
+    refl }
 end
 
 -- g(x) = Σ n:ℕ, xⁿ⁺¹ = Σ n:ℕ, cₙ xⁿ
@@ -1251,8 +1261,8 @@ end adj
 class sampler (α : Type) :=
 (gen : io α)
 
-def gen (α) [sampler α] := sampler.gen α
-def genₛ {α} (s : sampler α) := sampler.gen α
+def gen (α) [sampler α] := @sampler.gen α
+def genₛ {α} (s : sampler α) := @sampler.gen α s
 
 instance : functor sampler :=
 {map := λ α β f s, ⟨do x <- genₛ s, return $ f x⟩}
@@ -1347,16 +1357,16 @@ end sample
 
 namespace X
 def sized_ogf (f α) [has_ogf f] [sampler α] (size : ℕ) : sampler (f α) :=
-(has_ogf.iso f).g <$> sample.sized_ogf (has_ogf.cf f) α size
+(@has_ogf.iso f _ _).g <$> sample.sized_ogf (has_ogf.cf f) α size
 
 def sized_ogf₁ (α) [has_ogf₁ α] (size : ℕ): sampler α :=
-(has_ogf₁.iso α).g <$> sample.sized_ogf₁ (has_ogf₁.cf α) size
+(@has_ogf₁.iso α _).g <$> sample.sized_ogf₁ (has_ogf₁.cf α) size
 
 def bounded_ogf (f α) [has_ogf f] [sampler α] (max_size : ℕ) : sampler (f α) :=
-(has_ogf.iso f).g <$> sample.bounded_ogf (has_ogf.cf f) α max_size
+(@has_ogf.iso f _ _).g <$> sample.bounded_ogf (has_ogf.cf f) α max_size
 
 def bounded_ogf₁ (α) [has_ogf₁ α] (max_size : ℕ) : sampler α :=
-(has_ogf₁.iso α).g <$> sample.bounded_ogf₁ (has_ogf₁.cf α) max_size
+(@has_ogf₁.iso α _).g <$> sample.bounded_ogf₁ (has_ogf₁.cf α) max_size
 end X
 
 section examples
