@@ -46,6 +46,24 @@ def fset (n α) := quot (unordered n α)
 -- fsec(n,x) = xⁿ / n
 def fsec (n α) := quot (cyclic n α)
 
+-- Generic sequence
+def gseq (x : Type*) := Σ I : Type*, I → x
+
+namespace gseq
+variable {x : Type*}
+
+instance : has_coe_to_fun (gseq x) :=
+{ F := λ c, c.1 → x, coe := λ c, c.2 }
+
+instance : has_coe_to_sort (gseq x) :=
+{ S := Type*, coe := λ c, c.1 }
+
+end gseq
+
+-- Polynomial functor
+def poly (c : gseq Type*) (x : Type*) :=
+Σ i : c, c i → x
+
 -- Ordinary generating function
 -- ogf(c,x) = Σ n:ℕ, cₙ xⁿ
 def ogf (c : ℕ → ℕ) (α) :=
@@ -190,7 +208,7 @@ class has_ogf₁ (α : Type) :=
 (iso : α ≃ ogf cf 1)
 
 instance ogf_has_ogf₁ {f} [has_ogf f] : has_ogf₁ (f 1) :=
-⟨has_ogf.cf f, @has_ogf.iso f _ _⟩
+⟨has_ogf.cf f, has_ogf.iso⟩
 
 attribute [simp] function.comp
 
