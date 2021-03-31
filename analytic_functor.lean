@@ -511,7 +511,7 @@ def add_iso {a b} : fin a ⊕ fin b ≃ fin (a + b) :=
        induction x with x xih,
        { exact nat.lt_irrefl a h },
        { have g : a < a + (nat.succ x) := nat.lt_add_of_pos_right (nat.pos_of_ne_zero (nat.succ_ne_zero x)),
-         exact nat.lt_asymm h g }
+         exact nat.lt_le_antisymm h (nat.le_of_lt g) }
      end,
      simp [dif_neg h, nat.add_sub_cancel_left a x] }
  end,
@@ -523,7 +523,7 @@ def add_iso {a b} : fin a ⊕ fin b ≃ fin (a + b) :=
    { rw dif_neg h,
      have i := nat.eq_or_lt_of_not_lt h,
      induction i,
-     { simp [i, nat.sub_self a], refl },
+     { simp [i, nat.sub_self a] },
      { simp [nat.add_sub_of_le (nat.le_of_lt i)] }}
  end⟩
 
@@ -930,7 +930,7 @@ namespace fins
 def one_iso : fin 0 → fin 0 ≃ 1 :=
 ⟨λ x, (),
  λ x, fin.elim0,
- λ x, funext fin.elim0,
+ λ x, funext (λ y, fin.elim0 (x y)),
  λ x, by induction x; refl⟩
 
 -- 0ⁿ⁺¹ = 0
@@ -1051,19 +1051,18 @@ def cf_lemma : cf = ogf.cmul (delta 1) (K 1) :=
 begin
   funext n,
   by_cases n=0,
-  { simp [h, cf, delta, K, ogf.cmul, partial_sum, if_neg nat.zero_ne_one], refl },
+  { simp [h, cf, delta, K, ogf.cmul, partial_sum, if_neg nat.zero_ne_one] },
   simp [h, cf, delta, K, ogf.cmul, partial_sum],
   induction n with n ih,
   { exact false.elim (h rfl) },
   simp [partial_sum],
   by_cases n=0,
   { rename h g,
-    simp [g, partial_sum, if_neg nat.zero_ne_one], refl},
+    simp [g, partial_sum, if_neg nat.zero_ne_one] },
   { rename h g,
     rw ←ih g,
     have h₁ : ¬n+1=1 := λ x, false.elim (g (nat.add_right_cancel x)),
-    rw if_neg h₁,
-    refl }
+    rw if_neg h₁ }
 end
 
 -- g(x) = Σ n:ℕ, xⁿ⁺¹ = Σ n:ℕ, cₙ xⁿ
