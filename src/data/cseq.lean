@@ -1,3 +1,5 @@
+import ..type
+
 -- Cardinal sequence
 -- `cseq x` is a sequence of `x` with length some cardinal number
 @[reducible, simp]
@@ -28,7 +30,8 @@ def mem (p : X) (c : cseq X) := ∃ i : c, c i = p
 instance : has_mem X (cseq X) :=
 ⟨mem⟩
 
-def empty : cseq X := ⟨empty, empty.rec _⟩
+def empty : cseq X := ⟨0, pempty.rec _⟩
+def single {X} (x : X) : cseq X := ⟨1, λ _, x⟩
 
 instance : inhabited (cseq X) :=
 ⟨empty⟩
