@@ -1,4 +1,4 @@
-import ..data.cseq
+import ..functors.cseq
 import ..isos.nat
 
 open cseq
@@ -17,7 +17,7 @@ def theorems (M) := Σ c : statements M, proofs c
 
 def theory (M) := theorems M → theorems M
 
-def is_complete {M} (c : theorems M) := c.1.is_full
+def is_complete {M} (c : theorems M) := c.1.is_complete
 
 section examples
 def ex₁ : theorems ℕ :=

@@ -1,4 +1,4 @@
-import ..data.cseq
+import .cseq
 import ..type
 
 -- Polynomial functor
@@ -13,6 +13,6 @@ instance {c} : functor (poly c) :=
 { map := @map c }
 
 instance {c} : is_lawful_functor (poly c) :=
-{ id_map := by intros; simp [map],
-  comp_map := by intros; simp [map] }
+{ id_map := by intros; simp [functor.map, map],
+  comp_map := by intros; simp [functor.map, map] }
 end poly

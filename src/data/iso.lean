@@ -83,6 +83,7 @@ func i id_iso
 def curry {A B C : Type} : A → B → C ≃ (A × B) → C :=
 ⟨λ f x, f x.1 x.2, λ f x y, f (x, y), by simp, by simp⟩
 
+-- pullback in typos (category of types as a topos)
 -- cᵃ cᵇ = cᵃ⁺ᵇ
 def mul_func₁ {A B C : Type} : (A → C) × (B → C) ≃ (A ⊕ B) → C :=
 ⟨λ x y, sum.rec x.1 x.2 y,
@@ -90,6 +91,7 @@ def mul_func₁ {A B C : Type} : (A → C) × (B → C) ≃ (A ⊕ B) → C :=
  λ x, by simp,
  λ x, by funext y; induction y; repeat { simp }⟩
 
+-- pushout in typos
 -- bᵃ cᵃ = (bc)ᵃ
 def mul_func₂ {A B C : Type} : (A → B) × (A → C) ≃ A → B × C :=
 ⟨λ x y, (x.1 y, x.2 y),
@@ -97,7 +99,7 @@ def mul_func₂ {A B C : Type} : (A → B) × (A → C) ≃ A → B × C :=
  λ x, by induction x with x₁ x₂; congr,
  λ x, funext (λ y, by simp)⟩
 
-def sigma_subst {A} {B C : A → Type} (i : Π a:A, B a ≃ C a) : (Σ a:A, B a) ≃ Σ a:A, C a :=
+def sigma_subst {A : Type*} {B C : A → Type*} (i : Π a:A, B a ≃ C a) : (Σ a:A, B a) ≃ Σ a:A, C a :=
 ⟨λ x, ⟨x.1, (i x.1).f x.2⟩,
  λ x, ⟨x.1, (i x.1).g x.2⟩,
  λ x, begin induction x with x₁ x₂, simp [(i x₁).gf] end,
@@ -330,10 +332,10 @@ instance applicative [applicative f] : applicative g :=
 --     simp [is_lawful_applicative.pure_seq_eq_map, is_lawful_applicative.seq_assoc]
 --   end }
 
-@[priority std.priority.default-1]
-instance monad [monad f] : monad g :=
-{ pure := @ipure f g @i _,
-  bind := @ibind f g @i _ }
+-- @[priority std.priority.default-1]
+-- instance monad [monad f] : monad g :=
+-- { pure := @ipure f g @i _,
+--   bind := @ibind f g @i _ }
 
 -- @[priority std.priority.default-1]
 -- instance is_lawful_monad [is_lawful_monad f] : is_lawful_monad g :=
