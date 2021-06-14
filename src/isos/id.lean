@@ -1,4 +1,4 @@
-import .fseq_ogf
+import isos.fseq_ogf
 
 namespace id
 -- x = Σ n:ℕ, δ(1,n) xⁿ

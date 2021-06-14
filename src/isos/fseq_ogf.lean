@@ -1,4 +1,4 @@
-import ..functors.generating
+import functors.generating
 
 namespace fseq
 -- xᵏ = Σ n:ℕ, δ(k,n) xⁿ

@@ -1,4 +1,4 @@
-import .id
+import isos.id
 
 namespace nat
 -- ℕ = 1 + ℕ

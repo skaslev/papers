@@ -1,6 +1,6 @@
-import ..data.iso
-import .cofunctor
-import .comonad
+import data.iso
+import category.cofunctor
+import category.comonad
 
 -- Yoneda lemma can be stated in terms of the right and left Kan extensions
 -- along the id functor

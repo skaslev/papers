@@ -1,5 +1,5 @@
 import system.io
-import .functors.generating
+import functors.generating
 
 class sampler (A : Type) :=
 (gen : io A)

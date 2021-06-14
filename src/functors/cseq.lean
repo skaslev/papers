@@ -1,4 +1,4 @@
-import ..type
+import type
 
 -- Cardinal sequence aka "polynomial functor"
 -- `cseq x` is a sequence of `x` with length some cardinal number

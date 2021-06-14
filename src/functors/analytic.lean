@@ -1,5 +1,5 @@
-import ..data.fseq
-import ..data.iso
+import data.fseq
+import data.iso
 
 -- Analytic functor
 -- This is definition 1.2 from [3] but the relation r doesn't depend

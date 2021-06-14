@@ -1,4 +1,4 @@
-import ..functors.generating
+import functors.generating
 
 namespace zero
 -- 0 = Σ n:ℕ, cₙ xⁿ

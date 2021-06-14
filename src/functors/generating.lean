@@ -4,11 +4,11 @@
 -- [1] https://aofa.cs.princeton.edu/home
 -- [2] http://algo.inria.fr/flajolet/Publications/book.pdf
 
-import ..data.iso
-import ..data.fseq
-import ..function
-import ..isos.fseq
-import .analytic
+import data.iso
+import data.fseq
+import function
+import isos.fseq
+import functors.analytic
 
 def perm (n) := fin n ≃ fin n
 def orbit {n} (p : perm n) (a b : fin n) := ∃ k, iter p.1 k a = b

@@ -1,4 +1,4 @@
-import .id
+import isos.id
 
 -- sq(x) = x²
 def sq (A) := A × A

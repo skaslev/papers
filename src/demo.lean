@@ -1,7 +1,7 @@
-import .isos.bool
-import .isos.option
-import .isos.list
-import .sampler
+import isos.bool
+import isos.option
+import isos.list
+import sampler
 
 def out {A} [has_repr A] (a : io A) : io unit :=
 do

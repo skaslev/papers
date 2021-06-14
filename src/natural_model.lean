@@ -2,8 +2,8 @@
 -- by Steve Awodey on the Polynomial Functor Workshop
 -- https://youtu.be/RDuNIP4icKI?list=PLhgq-BqyZ7i7R-fGcAmNyWmJBQg1wzex-&t=10765
 
-import .data.iso
-import .functors.cseq
+import data.iso
+import functors.cseq
 
 -- Type' is a pointed type
 def Type' := Σ A : Type*, A

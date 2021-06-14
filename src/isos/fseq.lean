@@ -1,6 +1,6 @@
-import ..data.iso
-import ..data.fseq
-import .fin
+import data.iso
+import data.fseq
+import isos.fin
 
 namespace fseq
 -- x⁰ = 1

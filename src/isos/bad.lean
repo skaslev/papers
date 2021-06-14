@@ -1,4 +1,4 @@
-import .list
+import isos.list
 
 namespace bad₁
 -- c = a + bc  ⇒  c - bc = a  ⇒  c(1-b) = a  ⇒  c = a/(1-b)

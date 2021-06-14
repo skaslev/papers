@@ -1,5 +1,5 @@
-import .geom
-import .fseq_ogf
+import isos.geom
+import isos.fseq_ogf
 
 inductive vec (A : Type) : ℕ → Type
 | nil : vec 0

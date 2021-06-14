@@ -1,5 +1,5 @@
-import ..data.fseq
-import ..functors.generating
+import data.fseq
+import functors.generating
 
 -- Geometric power series
 -- geom(x) = Σ n:ℕ, xⁿ

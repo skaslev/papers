@@ -1,4 +1,4 @@
-import .list
+import isos.list
 
 namespace fins
 -- 0⁰ = 1

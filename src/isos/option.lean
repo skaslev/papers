@@ -1,4 +1,4 @@
-import ..functors.generating
+import functors.generating
 
 namespace option
 -- option(x) = 1 + x

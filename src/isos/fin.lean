@@ -1,4 +1,4 @@
-import ..data.iso
+import data.iso
 
 namespace fin
 @[simp]

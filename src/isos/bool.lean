@@ -1,4 +1,4 @@
-import ..functors.generating
+import functors.generating
 
 namespace bool
 def def_iso : bool ≃ 1 ⊕ 1 :=

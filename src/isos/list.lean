@@ -1,5 +1,5 @@
-import .nat
-import .vec
+import isos.nat
+import isos.vec
 
 namespace list
 -- list(x) = 1 + x list(x) = 1/(1-x)

@@ -1,5 +1,5 @@
-import ..functors.cseq
-import ..isos.nat
+import functors.cseq
+import isos.nat
 
 open cseq
 

@@ -1,4 +1,4 @@
-import .fseq_ogf
+import isos.fseq_ogf
 
 namespace one
 -- 1 = Σ n:ℕ, δ(0,n) xⁿ

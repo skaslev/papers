@@ -1,5 +1,5 @@
-import ..function
-import ..type
+import function
+import type
 
 structure {u v} iso (A : Sort u) (B : Sort v) :=
 (f : A → B)

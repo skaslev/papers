@@ -1,4 +1,4 @@
-import ..data.iso
+import data.iso
 
 -- Adjoint functors
 -- bᶠ⁽ᵃ⁾ = g(b)ᵃ

@@ -1,5 +1,5 @@
-import .cseq
-import ..type
+import functors.cseq
+import type
 
 -- Polynomial functor
 def poly (c : cseq Type*) (X : Type*) :=

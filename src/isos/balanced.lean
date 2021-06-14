@@ -1,4 +1,4 @@
-import .fins
+import isos.fins
 
 -- Balanced Trees[4,5,6]
 -- [4] https://github.com/skaslev/papers/blob/master/iterating.pdf

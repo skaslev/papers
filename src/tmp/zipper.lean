@@ -1,6 +1,5 @@
-import ..function
-import ..data.iso
-import ..category.comonad
+import data.iso
+import category.comonad
 
 def U := Type
 def UU := Type → Type
