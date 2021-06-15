@@ -1,7 +1,7 @@
-import functors.cseq
+import functors.family
 import isos.nat
 
-open cseq
+open fam
 
 @[reducible, simp]
 def statement (M : Type*) := M → Type*
@@ -9,7 +9,7 @@ def statement (M : Type*) := M → Type*
 def proof {M} (c : statement M) := Π m, c m
 
 @[reducible, simp]
-def statements (M) := cseq (statement M)
+def statements (M) := fam (statement M)
 
 def proofs {M} (c : statements M) := Π i, proof (c i)
 

@@ -1,8 +1,8 @@
-import functors.cseq
+import functors.family
 import type
 
 -- Polynomial functor
-def poly (c : cseq Type*) (X : Type*) :=
+def poly (c : fam Type*) (X : Type*) :=
 Σ i : c, c i → X
 
 namespace poly
