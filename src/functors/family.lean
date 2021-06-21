@@ -23,6 +23,9 @@ instance : has_coe_to_fun (fam X) :=
 instance : has_coe_to_sort (fam X) :=
 { S := Type*, coe := λ c, c.1 }
 
+def fibers {A B} (f : A → B) : fam Type* :=
+⟨B, fiber f⟩
+
 @[reducible, simp]
 def mem (p : X) (c : fam X) := ∃ i : c, c i = p
 
@@ -40,6 +43,9 @@ def is_complete  (c : fam X) := ∀ p : X,  p ∈ c
 
 def empty_is_empty : is_empty (@empty X) :=
 λ p ⟨i, _⟩, i.rec _
+
+def add {A} (x : fam A) (y : fam A) : fam A :=
+⟨x ⊕ y, λ i, sum.rec x y i⟩
 
 def map {X Y} (f : X → Y) (x : fam X) : fam Y :=
 ⟨x.1, f ∘ x.2⟩

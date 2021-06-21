@@ -15,10 +15,13 @@ instance : has_repr pempty :=
 def {u} sort_has_one : has_one (Sort u) :=
 {one := punit}
 
-def fiber {A B : Type*} (f : A → B) (y : B) := Σ' x, f(x) = y
+def fiber {A B : Type*} (f : A → B) (y : B) := Σ' x, f x = y
+def fibers {A B : Type*} (f : A → B) := Σ y, fiber f y
 
 def iscontr (A : Type*) := ∃ x : A, ∀ y : A, x = y
 def isprop (A : Type*) := ∀ x y : A, x = y
+
+def isweq {A B} (f : A → B) := Π y, iscontr (fiber f y)
 
 def isprop_unit : isprop unit
 | () () := rfl
