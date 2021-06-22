@@ -9,6 +9,7 @@ import data.fseq
 import function
 import isos.fseq
 import functors.analytic
+import functors.polynomial
 
 def perm (n) := fin n ≃ fin n
 def orbit {n} (p : perm n) (a b : fin n) := ∃ k, iter p.1 k a = b
@@ -47,24 +48,34 @@ def lgf (c : ℕ₁ → ℕ) (A) :=
 def dgf (k : ℕ₁) (c : ℕ₁ → ℕ) (A) :=
 Σ n:ℕ₁, fin (c n) × quot (dirichlet k n A)
 
+def ezpz {A} {B C : A → Type*} : (Σ a, B a × C a) ≃ Σ (i : Σ a, B a), C i.1 :=
+⟨λ x, ⟨⟨x.1, x.2.1⟩, x.2.2⟩,
+ λ x, ⟨x.1.1, ⟨x.1.2, x.2⟩⟩,
+ λ ⟨a, ⟨b, c⟩⟩, rfl,
+ λ ⟨⟨a, b⟩, c⟩, rfl⟩
+
 def shape {N} (c : N → ℕ) := Σ n, fin (c n)
 def size {N c} (x : @shape N c) := x.1
 
+-- ogf(c) ≃ poly(⟨shape(c), fin ∘ size⟩)
+def ogf.poly_iso {c A} : ogf c A ≃ poly ⟨shape c, fin ∘ size⟩ A :=
+ezpz
+
 -- ogf(c) ↪ af(ordered, shape(c), size)
-def lift_ogf {c A} (x : ogf c A) : af ordered (shape c) size A :=
+def ogf.lift_af {c A} (x : ogf c A) : af ordered (shape c) size A :=
 ⟨⟨x.1, x.2.1⟩, quot.mk _ x.2.2⟩
 
--- egf(c) ↪ af(unordered, shape(c), size)
-def lift_egf {c A} (x : egf c A) : af unordered (shape c) size A :=
-⟨⟨x.1, x.2.1⟩, x.2.2⟩
+-- egf(c) ≃ af(unordered, shape(c), size)
+def egf.af_iso {c A} : egf c A ≃ af unordered (shape c) size A :=
+ezpz
 
--- lgf(c) ↪ af₁(cyclic, shape(c), size)
-def lift_lgf {c A} (x : lgf c A) : af₁ cyclic (shape c) size A :=
-⟨⟨x.1, x.2.1⟩, x.2.2⟩
+-- lgf(c) ≃ af₁(cyclic, shape(c), size)
+def lgf.af₁_iso {c A} : lgf c A ≃ af₁ cyclic (shape c) size A :=
+ezpz
 
--- dgf(k,c) ↪ af₁(dirichlet(k), shape(c), size)
-def lift_dgf {k c A} (x : dgf k c A) : af₁ (dirichlet k) (shape c) size A :=
-⟨⟨x.1, x.2.1⟩, x.2.2⟩
+-- dgf(k,c) ≃ af₁(dirichlet(k), shape(c), size)
+def dgf.af₁_iso {k c A} : dgf k c A ≃ af₁ (dirichlet k) (shape c) size A :=
+ezpz
 
 class has_ogf (f : Type → Type) :=
 (cf : ℕ → ℕ)

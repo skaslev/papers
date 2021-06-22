@@ -7,6 +7,9 @@ def fam (X : Type*) := Σ A : Type*, A → X
 namespace fam
 variable {X : Type*}
 
+def mk {A} (f : A → X) : fam X :=
+⟨A, f⟩
+
 -- Families can be coerced both to type and a function.
 -- For example we can write the polynomial functor as
 --
@@ -22,9 +25,6 @@ instance : has_coe_to_fun (fam X) :=
 
 instance : has_coe_to_sort (fam X) :=
 { S := Type*, coe := λ c, c.1 }
-
-def fibers {A B} (f : A → B) : fam Type* :=
-⟨B, fiber f⟩
 
 @[reducible, simp]
 def mem (p : X) (c : fam X) := ∃ i : c, c i = p

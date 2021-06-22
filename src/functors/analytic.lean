@@ -1,5 +1,6 @@
 import data.fseq
 import data.iso
+import functors.polynomial
 
 -- Analytic functor
 -- This is definition 1.2 from [3] but the relation r doesn't depend
@@ -8,6 +9,10 @@ import data.iso
 -- af(r,I,s,x) = Σ i:I, x^s(i) / r(s(i))
 def af (r : Π n A, rel (fseq n A)) (I) (s : I → ℕ) (A) :=
 Σ i:I, quot (r (s i) A)
+
+-- af(r, I, s) ≃ qpf(⟨I, fin ∘ s⟩, λ i, r (s i))
+def af.qpf_iso (r I s A) : af r I s A ≃ qpf ⟨I, fin ∘ s⟩ (λ i, r (s i)) A :=
+iso.id_iso
 
 def af₁ (r : Π (n:ℕ₁) A, rel (fseq n.1 A)) (I) (s : I → ℕ₁) (A) :=
 Σ i:I, quot (r (s i) A)

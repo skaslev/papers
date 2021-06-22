@@ -26,7 +26,7 @@ def lam (c : fam Type') : Type' := ⟨(pie ∘ functor.map p) c, λ i, (c i).2�
 -- https://youtu.be/RDuNIP4icKI?t=12445
 def p_pie_pullback : p ∘ lam = pie ∘ functor.map p := rfl
 
-def Q := Σ c, sig c
+def Q := sig $ fam.mk sig
 def q (x : Q) : fam Type* := x.1
 def pair (x : Q) : Type' := ⟨(sig ∘ q) x, x.2⟩
 -- https://youtu.be/RDuNIP4icKI?t=12866
