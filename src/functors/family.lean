@@ -1,4 +1,4 @@
-import type
+import data.iso
 
 -- Family of `X`s
 -- `fam x` is a collection of `x` with length some cardinal number
@@ -6,9 +6,6 @@ def fam (X : Type*) := Σ A : Type*, A → X
 
 namespace fam
 variable {X : Type*}
-
-def mk {A} (f : A → X) : fam X :=
-⟨A, f⟩
 
 -- Families can be coerced both to type and a function.
 -- For example we can write the polynomial functor as
@@ -26,6 +23,16 @@ instance : has_coe_to_fun (fam X) :=
 instance : has_coe_to_sort (fam X) :=
 { S := Type*, coe := λ c, c.1 }
 
+def of {A X} (f : A → X) : fam X :=
+⟨A, f⟩
+
+-- "Car Salesman: *slaps `fam.of`* this bad boy can fit a whole `f : Type* → Type*` in it."
+def of_iso {f : Type* → Type*} {A} : f A ≃ of f A :=
+iso.id_iso
+
+def fam_iso {c : fam Type*} {A} : c A ≃ of c A :=
+iso.id_iso
+
 @[reducible, simp]
 def mem (p : X) (c : fam X) := ∃ i : c, c i = p
 
@@ -39,7 +46,7 @@ instance : inhabited (fam X) :=
 ⟨empty⟩
 
 def is_empty (c : fam X) := ∀ p : X, ¬p ∈ c
-def is_complete  (c : fam X) := ∀ p : X,  p ∈ c
+def is_complete (c : fam X) := ∀ p : X, p ∈ c
 
 def empty_is_empty : is_empty (@empty X) :=
 λ p ⟨i, _⟩, i.rec _

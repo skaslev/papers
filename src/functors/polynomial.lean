@@ -14,6 +14,12 @@ def qpf (c : fam Type*) (r : Π i A, rel (c i → A)) (A : Type*) :=
 def poly.lift_qpf {c A} (x : poly c A) : qpf c (λ _ _, eq) A :=
 ⟨x.1, quot.mk _ x.2⟩
 
+def poly.fam_iso {c A} : poly c A ≃ fam.of (poly c) A :=
+fam.of_iso
+
+def qpf.fam_iso {c r A} : qpf c r A ≃ fam.of (qpf c r) A :=
+fam.of_iso
+
 namespace poly
 -- Polynomial functor given by the fibers of `f`
 -- as in "Polynomial Functors and Polynomial Monads"
