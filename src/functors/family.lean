@@ -2,7 +2,7 @@ import data.iso
 
 -- Family of `X`s
 -- `fam x` is a collection of `x` with length some cardinal number
-def fam (X : Type*) := Σ A : Type*, A → X
+def fam (A : Type*) := Σ B : Type*, B → A
 
 namespace fam
 variable {X : Type*}

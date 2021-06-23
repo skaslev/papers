@@ -99,6 +99,24 @@ def mul_func₂ {A B C : Type} : (A → B) × (A → C) ≃ A → B × C :=
  λ x, by induction x with x₁ x₂; congr,
  λ x, funext (λ y, by simp)⟩
 
+ def pi_one {A} : (Π a:A, 1) ≃ 1 :=
+⟨λ x, unit.star,
+ λ x y, x,
+ λ x, funext (λ a, isprop_one _ _),
+ λ x, isprop_one _ _⟩
+
+ def pi_curry {A B} {C : A → B → Type*} : (Π a, Π b, C a b) ≃ Π (i : A × B), C i.1 i.2 :=
+⟨λ f x, f x.1 x.2,
+ λ f x y, f ⟨x, y⟩,
+ λ x, funext (λ y, rfl),
+ λ x, funext (λ ⟨a,b⟩, rfl)⟩
+
+ def pi_sigma_curry {A B} {C : A → Type*} : (Π a, C a → B) ≃ Π (i : Σ a, C a), B :=
+⟨λ f x, f x.1 x.2,
+ λ f x y, f ⟨x, y⟩,
+ λ x, funext (λ y, rfl),
+ λ x, funext (λ ⟨a,b⟩, rfl)⟩
+
 def sigma_subst {A : Type*} {B C : A → Type*} (i : Π a:A, B a ≃ C a) : (Σ a:A, B a) ≃ Σ a:A, C a :=
 ⟨λ x, ⟨x.1, (i x.1).f x.2⟩,
  λ x, ⟨x.1, (i x.1).g x.2⟩,
@@ -281,9 +299,9 @@ i.f $ i.g s <*> i.g x
 def ibind [monad f] {A B : Type u} (x : g A) (s : A → g B) : g B :=
 i.f $ i.g x >>= i.g ∘ s
 
-@[priority std.priority.default-1]
-instance functor [functor f] : functor g :=
-{ map := @imap f g @i _ }
+-- @[priority std.priority.default-1]
+-- instance functor [functor f] : functor g :=
+-- { map := @imap f g @i _ }
 
 -- @[priority std.priority.default-1]
 -- instance is_lawful_functor [functor f] : is_lawful_functor g :=
@@ -299,10 +317,10 @@ instance functor [functor f] : functor g :=
 --     rw is_lawful_functor.comp_map
 --   end }
 
-@[priority std.priority.default-1]
-instance applicative [applicative f] : applicative g :=
-{ pure := @ipure f g @i _,
-  seq := @iseq f g @i _ }
+-- @[priority std.priority.default-1]
+-- instance applicative [applicative f] : applicative g :=
+-- { pure := @ipure f g @i _,
+--   seq := @iseq f g @i _ }
 
 -- @[priority std.priority.default-1]
 -- instance is_lawful_applicative [is_lawful_applicative f] : is_lawful_applicative g :=

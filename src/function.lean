@@ -18,6 +18,13 @@ def take {A} : ℕ → (ℕ → A) → list A
 
 def const {A B} (a : A) (b : B) := a
 
+instance {A} : functor (const A) :=
+{ map := λ X Y f x, x }
+
+instance {A} : is_lawful_functor (const A) :=
+{ id_map := λ X x, rfl,
+  comp_map := λ X Y Z f g x, rfl }
+
 attribute [simp] function.comp
 
 def {u} id_def {A : Sort u} : id = λ x:A, x :=
