@@ -44,15 +44,11 @@ def s_i_eq_id : s ∘ i = id :=
 begin
   funext p,
   apply propext,
-  cases classical.em p with x x,
-  { have y : nonempty (inhabited p) := ⟨⟨x⟩⟩,
-    exact iff.intro (const x) (const y) },
-  cases classical.em (nonempty (inhabited p)) with y y,
-  { induction y,
-    induction y,
-    contradiction },
-  { apply iff.intro _ _,
-    repeat { contradiction } }
+  apply iff.intro (λ x, _) (λ x, _),
+  { induction x,
+    induction x,
+    exact x },
+  { exact nonempty.intro (inhabited.mk x) }
 end
 
 def all (c : fam Prop) : Prop := ∀ i, c i
