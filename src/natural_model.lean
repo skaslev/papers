@@ -6,10 +6,13 @@ import functors.family
 
 open fam
 
--- Type' is a pointed type
-def Type' := Σ A : Type*, A
-def p (x : Type') : Type* := x.1
-def P (X : Type*) : Type* := Σ I : Type*, fiber p I → X
+abbreviation U := Type*
+abbreviation Ω := Prop
+abbreviation P := fam
+
+-- U' is a pointed type
+def U' := Σ A : U, A
+def p (x : U') : U := x.1
 
 def fiber_p_A_iso_A {A} : fiber p A ≃ A :=
 ⟨λ x, eq.mpr (eq.symm x.2) x.1.2,
@@ -17,29 +20,30 @@ def fiber_p_A_iso_A {A} : fiber p A ≃ A :=
  λ ⟨⟨B, x⟩, eq.refl A⟩, rfl,
  λ x, rfl⟩
 
-def P_iso_fam {X} : P X ≃ fam X :=
+def P' (A : U) : U := Σ I : U, fiber p I → A
+def P'_iso_P {A} : P' A ≃ P A :=
 iso.sigma_subst (λ i, iso.func_left fiber_p_A_iso_A)
 
-def pie (c : fam Type*) : Type* := Π i, c i
-def sig (c : fam Type*) : Type* := Σ i, c i
+def pie (c : P U) : U := Π i, c i
+def sig (c : P U) : U := Σ i, c i
 
-def lam (c : fam Type') : Type' := ⟨(pie ∘ map p) c, λ i, (c i).2⟩
+def lam (c : P U') : U' := ⟨(pie ∘ map p) c, λ i, (c i).2⟩
 
 -- https://youtu.be/RDuNIP4icKI?t=12445
 def p_pie_pullback : p ∘ lam = pie ∘ map p := rfl
 
-def Q := sig $ of sig
-def q (x : Q) : fam Type* := x.1
-def pair (x : Q) : Type' := ⟨(sig ∘ q) x, x.2⟩
+def Q := sig (of sig)
+def q (x : Q) : P U := x.1
+def pair (x : Q) : U' := ⟨(sig ∘ q) x, x.2⟩
 
 -- https://youtu.be/RDuNIP4icKI?t=12866
 def p_sig_pullback : p ∘ pair = sig ∘ q := rfl
 
-def s (X : Type*) : Prop := nonempty X
-def i (X : Prop) : Type* := inhabited X
+def s (A : U) : Ω := nonempty A
+def i (A : Ω) : U := inhabited A
 
 -- https://youtu.be/RDuNIP4icKI?t=13639
-def trunc : Type* → Type* := i ∘ s
+def trunc : U → U := i ∘ s
 def s_i_eq_id : s ∘ i = id :=
 begin
   funext p,
@@ -51,14 +55,14 @@ begin
   { exact nonempty.intro (inhabited.mk x) }
 end
 
-def all (c : fam Prop) : Prop := ∀ i, c i
-def exi (c : fam Prop) : Prop := ∃ i, c i
+def all (c : P Ω) : Ω := ∀ i, c i
+def exi (c : P Ω) : Ω := ∃ i, c i
 
 -- https://youtu.be/RDuNIP4icKI?t=13681
 def all_as_pie : all = s ∘ pie ∘ map i :=
 begin
   funext c,
-  apply propext _,
+  apply propext,
   apply iff.intro (λ x, _) (λ x, _),
   { exact nonempty.intro (λ y, inhabited.mk (x y)) },
   { induction x,
@@ -72,7 +76,7 @@ end
 def exi_as_sig : exi = s ∘ sig ∘ map i :=
 begin
   funext c,
-  apply propext _,
+  apply propext,
   apply iff.intro (λ x, _) (λ x, _),
   { exact nonempty.intro ⟨classical.some x, inhabited.mk (classical.some_spec x)⟩ },
   { induction x,
