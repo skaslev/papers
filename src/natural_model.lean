@@ -4,6 +4,8 @@
 
 import functors.family
 
+open fam
+
 -- Type' is a pointed type
 def Type' := Σ A : Type*, A
 def p (x : Type') : Type* := x.1
@@ -21,12 +23,12 @@ iso.sigma_subst (λ i, iso.func_left fiber_p_A_iso_A)
 def pie (c : fam Type*) : Type* := Π i, c i
 def sig (c : fam Type*) : Type* := Σ i, c i
 
-def lam (c : fam Type') : Type' := ⟨(pie ∘ functor.map p) c, λ i, (c i).2⟩
+def lam (c : fam Type') : Type' := ⟨(pie ∘ map p) c, λ i, (c i).2⟩
 
 -- https://youtu.be/RDuNIP4icKI?t=12445
-def p_pie_pullback : p ∘ lam = pie ∘ functor.map p := rfl
+def p_pie_pullback : p ∘ lam = pie ∘ map p := rfl
 
-def Q := sig $ fam.of sig
+def Q := sig $ of sig
 def q (x : Q) : fam Type* := x.1
 def pair (x : Q) : Type' := ⟨(sig ∘ q) x, x.2⟩
 
@@ -57,11 +59,10 @@ def all (c : fam Prop) : Prop := ∀ i, c i
 def exi (c : fam Prop) : Prop := ∃ i, c i
 
 -- https://youtu.be/RDuNIP4icKI?t=13681
-def all_as_pie : all = s ∘ pie ∘ fam.map i :=
+def all_as_pie : all = s ∘ pie ∘ map i :=
 begin
   funext c,
   apply propext _,
-  induction c with I c,
   apply iff.intro (λ x, _) (λ x, _),
   { exact nonempty.intro (λ y, inhabited.mk (x y)) },
   { induction x,
@@ -72,11 +73,10 @@ begin
 end
 
 -- https://youtu.be/RDuNIP4icKI?t=13681
-def exi_as_sig : exi = s ∘ sig ∘ fam.map i :=
+def exi_as_sig : exi = s ∘ sig ∘ map i :=
 begin
   funext c,
   apply propext _,
-  induction c with I c,
   apply iff.intro (λ x, _) (λ x, _),
   { exact nonempty.intro ⟨classical.some x, inhabited.mk (classical.some_spec x)⟩ },
   { induction x,
