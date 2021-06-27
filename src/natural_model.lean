@@ -15,14 +15,15 @@ def U' := Σ A : U, A
 def p (x : U') : U := x.1
 
 def fiber_p_A_iso_A {A} : fiber p A ≃ A :=
-⟨λ x, eq.mpr (eq.symm x.2) x.1.2,
+⟨λ ⟨⟨A, x⟩, rfl⟩, x,
  λ x, ⟨⟨A, x⟩, rfl⟩,
- λ ⟨⟨B, x⟩, eq.refl A⟩, rfl,
+ λ ⟨⟨A, x⟩, rfl⟩, rfl,
  λ x, rfl⟩
 
+-- The `P` functor from the talk. We prove it's equivalent the one we use below.
 def P' (A : U) : U := Σ I : U, fiber p I → A
 def P'_iso_P {A} : P' A ≃ P A :=
-iso.sigma_subst (λ i, iso.func_left fiber_p_A_iso_A)
+iso.sigma_subst (λ I, iso.func_left fiber_p_A_iso_A)
 
 def pie (c : P U) : U := Π i, c i
 def sig (c : P U) : U := Σ i, c i
@@ -45,42 +46,21 @@ def i (A : Ω) : U := inhabited A
 -- https://youtu.be/RDuNIP4icKI?t=13639
 def trunc : U → U := i ∘ s
 def s_i_eq_id : s ∘ i = id :=
-begin
-  funext p,
-  apply propext,
-  apply iff.intro (λ x, _) (λ x, _),
-  { induction x,
-    induction x,
-    exact x },
-  { exact nonempty.intro (inhabited.mk x) }
-end
+funext $ λ p, propext
+⟨λ ⟨⟨x⟩⟩, x,
+ λ x, ⟨⟨x⟩⟩⟩
 
 def all (c : P Ω) : Ω := ∀ i, c i
 def exi (c : P Ω) : Ω := ∃ i, c i
 
 -- https://youtu.be/RDuNIP4icKI?t=13681
 def all_as_pie : all = s ∘ pie ∘ map i :=
-begin
-  funext c,
-  apply propext,
-  apply iff.intro (λ x, _) (λ x, _),
-  { exact nonempty.intro (λ y, inhabited.mk (x y)) },
-  { induction x,
-    intro y,
-    have z : inhabited (c y) := x y,
-    induction z,
-    exact z }
-end
+funext $ λ c, propext
+⟨λ x, ⟨λ y, ⟨x y⟩⟩,
+ λ ⟨x⟩ y, let ⟨z⟩ := x y in z⟩
 
 -- https://youtu.be/RDuNIP4icKI?t=13681
 def exi_as_sig : exi = s ∘ sig ∘ map i :=
-begin
-  funext c,
-  apply propext,
-  apply iff.intro (λ x, _) (λ x, _),
-  { exact nonempty.intro ⟨classical.some x, inhabited.mk (classical.some_spec x)⟩ },
-  { induction x,
-    induction x with y z,
-    induction z,
-    exact ⟨y, z⟩ }
-end
+funext $ λ c, propext
+⟨λ x, ⟨⟨classical.some x, ⟨classical.some_spec x⟩⟩⟩,
+ λ ⟨⟨x, ⟨y⟩⟩⟩, ⟨x, y⟩⟩
