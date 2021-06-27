@@ -17,6 +17,9 @@ def poly.lift_qpf {c A} (x : poly c A) : qpf c (λ _ _, eq) A :=
 def poly.fam_iso {c A} : poly c A ≃ fam.of (poly c) A :=
 fam.of_iso
 
+def fam.poly_iso {A} : fam A ≃ poly ⟨Type*, id⟩ A :=
+iso.id_iso
+
 def qpf.fam_iso {c r A} : qpf c r A ≃ fam.of (qpf c r) A :=
 fam.of_iso
 
