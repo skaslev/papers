@@ -1,8 +1,9 @@
 import data.iso
 
 -- Family of `X`s
--- `fam x` is a collection of `x` with length some cardinal number
-def fam (A : Type*) := Σ B : Type*, B → A
+-- `fam x` is a collection of `x` with length some cardinal number `y`
+-- fam(x) = Σ y, xʸ
+def fam (X : Type*) := Σ Y : Type*, Y → X
 
 namespace fam
 variable {X : Type*}
@@ -23,14 +24,19 @@ instance : has_coe_to_fun (fam X) :=
 instance : has_coe_to_sort (fam X) :=
 { S := Type*, coe := λ c, c.1 }
 
-def of {A X} (f : A → X) : fam X :=
-⟨A, f⟩
+def of {Y X} (f : Y → X) : fam X := ⟨Y, f⟩
+
+def all_types : fam Type* := of id
+def all_props : fam Prop := of id
 
 -- "Car Salesman: *slaps `fam.of`* this bad boy can fit a whole `f : Type* → Type*` in it."
 def of_iso {f : Type* → Type*} {A} : f A ≃ of f A :=
 iso.id_iso
 
 def fam_iso {c : fam Type*} {A} : c A ≃ of c A :=
+iso.id_iso
+
+def set_iso : fam Prop ≃ Σ X, set X :=
 iso.id_iso
 
 @[reducible, simp]
@@ -53,6 +59,9 @@ def empty_is_empty : is_empty (@empty X) :=
 
 def add {A} (x : fam A) (y : fam A) : fam A :=
 ⟨x ⊕ y, λ i, sum.rec x y i⟩
+
+def add_iso {A} (x y : fam A) : add x y ≃ x ⊕ y :=
+iso.id_iso
 
 def map {X Y} (f : X → Y) (x : fam X) : fam Y :=
 ⟨x.1, f ∘ x.2⟩

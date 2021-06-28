@@ -7,17 +7,17 @@ def poly (c : fam Type*) (X : Type*) :=
 Σ i : c, c i → X
 
 -- qpf(c,r) = Σ i:c, x^c(i) / r(i)
-def qpf (c : fam Type*) (r : Π i A, rel (c i → A)) (A : Type*) :=
-Σ i : c, quot (r i A)
+def qpf (c : fam Type*) (r : Π i X, rel (c i → X)) (X : Type*) :=
+Σ i : c, quot (r i X)
 
 -- poly(c) ↪ qpf(c, ordered)
-def poly.lift_qpf {c A} (x : poly c A) : qpf c (λ _ _, eq) A :=
-⟨x.1, quot.mk _ x.2⟩
+def poly.lift_qpf {c A} : poly c A → qpf c (λ _ _, eq) A :=
+λ ⟨i, x⟩, ⟨i, quot.mk _ x⟩
 
 def poly.fam_iso {c A} : poly c A ≃ fam.of (poly c) A :=
 fam.of_iso
 
-def fam.poly_iso {A} : fam A ≃ poly ⟨Type*, id⟩ A :=
+def fam.poly_iso {A} : fam A ≃ poly fam.all_types A :=
 iso.id_iso
 
 def qpf.fam_iso {c r A} : qpf c r A ≃ fam.of (qpf c r) A :=
