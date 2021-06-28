@@ -303,6 +303,9 @@ x.2.1 <$> comonad.dup x.2.2
 
 def cuncheckl_ccheckl (x : f A) : cuncheckl (ccheckl x) = x :=
 comonad.map_extract_over_dup
+
+def not_natural_ccheckl [inhabited (f unit)] : ¬natural (@ccheckl f _) :=
+λ h, unit_ne_bool (congr_arg sigma.fst (h (default (f unit)) (λ x, bool.tt)))
 end cyonedal
 
 def cyonedal_emb {f} [h : comonad f] {A} : emb (f A) (cyonedal f A) :=
