@@ -62,5 +62,5 @@ funext $ λ c, propext
 -- https://youtu.be/RDuNIP4icKI?t=13681
 def exi_as_sig : exi = s ∘ sig ∘ map i :=
 funext $ λ c, propext
-⟨λ x, ⟨⟨classical.some x, ⟨classical.some_spec x⟩⟩⟩,
+⟨λ ⟨x, y⟩, ⟨⟨x, ⟨y⟩⟩⟩,
  λ ⟨⟨x, ⟨y⟩⟩⟩, ⟨x, y⟩⟩
