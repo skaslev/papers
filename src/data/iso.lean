@@ -9,6 +9,9 @@ structure {u v} iso (A : Sort u) (B : Sort v) :=
 
 notation a ` ≃ ` b := iso a b
 
+instance {A B} : has_coe_to_fun (A ≃ B) :=
+{ F := λ i, A → B, coe := λ i, i.1 }
+
 -- Types        Algebra
 -- A            a
 -- A ⊕ B        a + b
@@ -134,6 +137,12 @@ def sigma_distr {A B} {C : B → Type} : (A × Σ b:B, C b) ≃ Σ b:B, A × C b
  λ x, (x.2.1, ⟨x.1, x.2.2⟩),
  λ x, by simp,
  λ x, by induction x with x₁ x₂; simp⟩
+
+def sigma_pull {A} {B C : A → Type*} : (Σ a, B a × C a) ≃ Σ (i : Σ a, B a), C i.1 :=
+⟨λ ⟨x, ⟨y, z⟩⟩, ⟨⟨x, y⟩, z⟩,
+ λ ⟨⟨x, y⟩, z⟩, ⟨x, ⟨y, z⟩⟩,
+ λ ⟨x, ⟨y, z⟩⟩, rfl,
+ λ ⟨⟨x, y⟩, z⟩, rfl⟩
 
 def sigma_swap {C : ℕ → ℕ → Type}: (Σ n k, C n k) ≃ Σ k n, C n k :=
 ⟨λ x, ⟨x.2.1, ⟨x.1, x.2.2⟩⟩,

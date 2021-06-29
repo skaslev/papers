@@ -1,5 +1,7 @@
 def ℕ₁ := Σ' n:ℕ, n > 0
 
+instance : has_coe ℕ₁ ℕ := ⟨λ n, n.1⟩
+
 def rel (A) := A → A → Prop
 
 inductive {u} pempty : Sort u

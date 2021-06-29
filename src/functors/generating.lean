@@ -48,34 +48,35 @@ def lgf (c : ℕ₁ → ℕ) (A) :=
 def dgf (k : ℕ₁) (c : ℕ₁ → ℕ) (A) :=
 Σ n:ℕ₁, fin (c n) × quot (dirichlet k n A)
 
-def ezpz {A} {B C : A → Type*} : (Σ a, B a × C a) ≃ Σ (i : Σ a, B a), C i.1 :=
-⟨λ x, ⟨⟨x.1, x.2.1⟩, x.2.2⟩,
- λ x, ⟨x.1.1, ⟨x.1.2, x.2⟩⟩,
- λ ⟨a, ⟨b, c⟩⟩, rfl,
- λ ⟨⟨a, b⟩, c⟩, rfl⟩
-
 def shape {N} (c : N → ℕ) := Σ n, fin (c n)
 def size {N c} (x : @shape N c) := x.1
 
--- ogf(c) ≃ poly(⟨shape(c), fin ∘ size⟩)
-def ogf.poly_iso {c A} : ogf c A ≃ poly ⟨shape c, fin ∘ size⟩ A :=
-ezpz
+def finitary (c : ℕ → ℕ) : fam Type* := ⟨shape c, fin ∘ size⟩
+def finitary₁ (c : ℕ₁ → ℕ) : fam Type* := ⟨shape c, fin ∘ coe ∘ size⟩
 
--- ogf(c) ↪ af(ordered, shape(c), size)
+def ogf.poly_iso {c A} : ogf c A ≃ poly (finitary c) A :=
+iso.sigma_pull
+
 def ogf.lift_af {c A} (x : ogf c A) : af ordered (shape c) size A :=
 ⟨⟨x.1, x.2.1⟩, quot.mk _ x.2.2⟩
 
--- egf(c) ≃ af(unordered, shape(c), size)
+def egf.qpf_iso {c A} : egf c A ≃ qpf (finitary c) (λ i, unordered (size i)) A :=
+iso.sigma_pull
+
 def egf.af_iso {c A} : egf c A ≃ af unordered (shape c) size A :=
-ezpz
+iso.sigma_pull
 
--- lgf(c) ≃ af₁(cyclic, shape(c), size)
+def lgf.qpf_iso {c A} : lgf c A ≃ qpf (finitary₁ c) (λ i, cyclic (size i)) A :=
+iso.sigma_pull
+
 def lgf.af₁_iso {c A} : lgf c A ≃ af₁ cyclic (shape c) size A :=
-ezpz
+iso.sigma_pull
 
--- dgf(k,c) ≃ af₁(dirichlet(k), shape(c), size)
+def dgf.qpf_iso {k c A} : dgf k c A ≃ qpf (finitary₁ c) (λ i, dirichlet k (size i)) A :=
+iso.sigma_pull
+
 def dgf.af₁_iso {k c A} : dgf k c A ≃ af₁ (dirichlet k) (shape c) size A :=
-ezpz
+iso.sigma_pull
 
 class has_ogf (f : Type → Type) :=
 (cf : ℕ → ℕ)
