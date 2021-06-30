@@ -28,25 +28,22 @@ iso.sigma_subst (λ I, iso.func_left fiber_p_A_iso_A)
 def pie (c : P U) : U := Π i, c i
 def sig (c : P U) : U := Σ i, c i
 
-def lam (c : P U') : U' := ⟨pie (map p c), λ i, (c i).2⟩
-
 -- https://youtu.be/RDuNIP4icKI?t=12445
-def p_pie_pullback : p ∘ lam = pie ∘ map p := rfl
+def lam' (c : P U') : U' := ⟨pie (map p c), λ i, (c i).2⟩
+def p_pie_pullback' : p ∘ lam' = pie ∘ map p := rfl
 
-namespace alt
+-- Alternative pullback of `p` and `pie`
 def R := Σ c : P U, pie c
-def r (x : R) : P U := x.1
-def lam (x : R) : U' := ⟨pie (r x), x.2⟩
-def p_pie_pullback : p ∘ lam = pie ∘ r := rfl
-end alt
-
-def Q := Σ c : P U, sig c
-example : Q = sig (of sig) := rfl
-def q (x : Q) : P U := x.1
-def pair (x : Q) : U' := ⟨sig (q x), x.2⟩
+def lam (x : R) : U' := ⟨pie x.1, x.2⟩
+def p_pie_pullback : p ∘ lam = pie ∘ sigma.fst := rfl
 
 -- https://youtu.be/RDuNIP4icKI?t=12866
-def p_sig_pullback : p ∘ pair = sig ∘ q := rfl
+def Q := Σ c : P U, sig c
+def pair (x : Q) : U' := ⟨sig x.1, x.2⟩
+def p_sig_pullback : p ∘ pair = sig ∘ sigma.fst := rfl
+
+example : R = sig (of pie) := rfl
+example : Q = sig (of sig) := rfl
 
 def s (A : U) : Ω := nonempty A
 def i (A : Ω) : U := inhabited A
