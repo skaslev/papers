@@ -28,14 +28,15 @@ iso.sigma_subst (λ I, iso.func_left fiber_p_A_iso_A)
 def pie (c : P U) : U := Π i, c i
 def sig (c : P U) : U := Σ i, c i
 
-def lam (c : P U') : U' := ⟨(pie ∘ map p) c, λ i, (c i).2⟩
+def lam (c : P U') : U' := ⟨pie (map p c), λ i, (c i).2⟩
 
 -- https://youtu.be/RDuNIP4icKI?t=12445
 def p_pie_pullback : p ∘ lam = pie ∘ map p := rfl
 
-def Q := sig (of sig)
+def Q := Σ c : P U, sig c
+example : Q = sig (of sig) := rfl
 def q (x : Q) : P U := x.1
-def pair (x : Q) : U' := ⟨(sig ∘ q) x, x.2⟩
+def pair (x : Q) : U' := ⟨sig (q x), x.2⟩
 
 -- https://youtu.be/RDuNIP4icKI?t=12866
 def p_sig_pullback : p ∘ pair = sig ∘ q := rfl
