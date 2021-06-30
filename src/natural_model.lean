@@ -33,6 +33,13 @@ def lam (c : P U') : U' := ⟨pie (map p c), λ i, (c i).2⟩
 -- https://youtu.be/RDuNIP4icKI?t=12445
 def p_pie_pullback : p ∘ lam = pie ∘ map p := rfl
 
+namespace alt
+def R := Σ c : P U, pie c
+def r (x : R) : P U := x.1
+def lam (x : R) : U' := ⟨pie (r x), x.2⟩
+def p_pie_pullback : p ∘ lam = pie ∘ r := rfl
+end alt
+
 def Q := Σ c : P U, sig c
 example : Q = sig (of sig) := rfl
 def q (x : Q) : P U := x.1
