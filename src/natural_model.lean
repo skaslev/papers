@@ -45,6 +45,18 @@ def p_sig_pullback : p ∘ pair = sig ∘ sigma.fst := rfl
 example : R = sig (of pie) := rfl
 example : Q = sig (of sig) := rfl
 
+def R_iso_P_U' : R ≃ P U' :=
+⟨λ x, ⟨x.1, λ i, ⟨x.1 i, x.2 i⟩⟩,
+ λ x, ⟨⟨x, λ i, (x i).1⟩, λ i, (x i).2⟩,
+ λ ⟨⟨A, B⟩, x⟩, rfl,
+ λ ⟨A, x⟩, congr_arg _ $ funext $ λ i, sigma.eq rfl rfl⟩
+
+def Q_iso_expl : Q ≃ Σ (A : U) (B : A → U) (a : A), B a :=
+⟨λ ⟨⟨A, B⟩, ⟨a, b⟩⟩, ⟨A, B, a, b⟩,
+ λ ⟨A, B, a, b⟩, ⟨⟨A, B⟩, ⟨a, b⟩⟩,
+ λ ⟨⟨A, B⟩, ⟨a, b⟩⟩, rfl,
+ λ ⟨A, B, a, b⟩, rfl⟩
+
 def s (A : U) : Ω := nonempty A
 def i (A : Ω) : U := inhabited A
 
