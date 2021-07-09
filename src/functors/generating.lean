@@ -29,12 +29,12 @@ def fset (n A) := quot (unordered n A)
 -- fsec(n,x) = xⁿ / n
 def fsec (n A) := quot (cyclic n A)
 
--- Ordinary generating function
+-- Ordinary generating functor
 -- ogf(c,x) = Σ n:ℕ, cₙ xⁿ
 def ogf (c : ℕ → ℕ) (X) :=
 Σ n:ℕ, fin (c n) × fseq n X
 
--- Exponential generating function
+-- Exponential generating functor
 -- egf(c,x) = Σ n:ℕ, cₙ xⁿ / n!
 def egf (c : ℕ → ℕ) (A) :=
 Σ n:ℕ, fin (c n) × fset n A
@@ -43,7 +43,7 @@ def egf (c : ℕ → ℕ) (A) :=
 def lgf (c : ℕ₁ → ℕ) (A) :=
 Σ n:ℕ₁, fin (c n) × fsec n A
 
--- Dirichlet generating function
+-- Dirichlet generating functor
 -- dgf(k,c,x) = Σ n:ℕ₁, cₙ xⁿ / nᵏ
 def dgf (k : ℕ₁) (c : ℕ₁ → ℕ) (A) :=
 Σ n:ℕ₁, fin (c n) × quot (dirichlet k n A)
