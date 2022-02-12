@@ -100,19 +100,19 @@ def mul_func₂ {A B C : Type} : (A → B) × (A → C) ≃ A → B × C :=
  λ x, by induction x with x₁ x₂; congr,
  λ x, funext (λ y, by simp)⟩
 
- def pi_one {A} : (Π a:A, 1) ≃ 1 :=
+def pi_one {A} : (Π a:A, 1) ≃ 1 :=
 ⟨λ x, unit.star,
  λ x y, x,
  λ x, funext (λ a, isprop_one _ _),
  λ x, isprop_one _ _⟩
 
- def pi_curry {A B} {C : A → B → Type*} : (Π a, Π b, C a b) ≃ Π (i : A × B), C i.1 i.2 :=
+def pi_curry {A B} {C : A → B → Type*} : (Π a, Π b, C a b) ≃ Π (i : A × B), C i.1 i.2 :=
 ⟨λ f x, f x.1 x.2,
  λ f x y, f ⟨x, y⟩,
  λ x, funext (λ y, rfl),
  λ x, funext (λ ⟨a,b⟩, rfl)⟩
 
- def pi_sigma_curry {A B} {C : A → Type*} : (Π a, C a → B) ≃ Π (i : Σ a, C a), B :=
+def pi_sigma_curry {A B} {C : A → Type*} : (Π a, C a → B) ≃ Π (i : Σ a, C a), B :=
 ⟨λ f x, f x.1 x.2,
  λ f x y, f ⟨x, y⟩,
  λ x, funext (λ y, rfl),
