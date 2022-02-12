@@ -86,7 +86,6 @@ func i id_iso
 def curry {A B C : Type} : A → B → C ≃ (A × B) → C :=
 ⟨λ f x, f x.1 x.2, λ f x y, f (x, y), by simp, by simp⟩
 
--- pullback in typos (category of types as a topos)
 -- cᵃ cᵇ = cᵃ⁺ᵇ
 def mul_func₁ {A B C : Type} : (A → C) × (B → C) ≃ (A ⊕ B) → C :=
 ⟨λ x y, sum.rec x.1 x.2 y,
@@ -94,7 +93,6 @@ def mul_func₁ {A B C : Type} : (A → C) × (B → C) ≃ (A ⊕ B) → C :=
  λ x, by simp,
  λ x, by funext y; induction y; repeat { simp }⟩
 
--- pushout in typos
 -- bᵃ cᵃ = (bc)ᵃ
 def mul_func₂ {A B C : Type} : (A → B) × (A → C) ≃ A → B × C :=
 ⟨λ x y, (x.1 y, x.2 y),
