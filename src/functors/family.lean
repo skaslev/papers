@@ -119,3 +119,20 @@ instance : monad fam :=
 --   sorry
 -- end
 end fam
+
+-- Direct and inverse image functors
+namespace fam
+def direct {X Y} (f : X → Y) : fam X → fam Y :=
+λ xs, ⟨xs, f ∘ xs⟩
+
+def inverse {X Y} (f : X → Y) : fam Y → fam X :=
+λ ys, ⟨Σ' x j, f x = ys j, psigma.fst⟩
+end fam
+
+namespace set
+def direct {X Y} (f : X → Y) : set X → set Y :=
+λ xs y, ∃ x ∈ xs, f x = y
+
+def inverse {X Y} (f : X → Y) : set Y → set X :=
+λ ys, ys ∘ f
+end set
